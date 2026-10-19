@@ -130,7 +130,13 @@
   <div class="note">
     <b>印刷ダイアログでの設定</b><br>
     送信先＝<b>PDFに保存</b>／用紙＝A4／余白＝既定／倍率＝100%／<b>背景のグラフィック＝オン</b><br>
-    <b>「ヘッダーとフッター」のチェックは外してください。</b>外さないと、日付・URL・ページ番号が紙に印字されます。
+    <b>「ヘッダーとフッター」のチェックは必ず外してください。</b>外さないと、日付・URL・ページ番号が通知書に印字されます。
+  </div>
+  <div class="hint" style="margin-top:10px">
+    <b>ファイル名について。</b>保存時のファイル名は自動で入ります。<br>
+    ・1人だけ出したとき　→　<code>労働条件通知書_会社名_氏名</code><br>
+    ・同じ会社の複数人　→　<code>労働条件通知書_会社名_○名</code>（1つのPDFにまとまります）<br>
+    <b>1人1ファイルで作りたいときは、上の表の各行にある「通知書」ボタンから1人ずつ出してください。</b>
   </div>
 </div>
 
@@ -349,7 +355,9 @@ function buildCompany(key,rs,F){
     e.patName=p.name; e.start=p.start; e.end=p.end; e.brk=p.brk;
     e.varType=p.varType; e.otYes=p.otYes;
     e.otW='';e.otM='';e.otY='';e.hdwM='';e.hdwY='';
-    e.hdReg=comp.hdReg; e.hdIrr=comp.hdIrr; e.workDays=''; e.dpw=p.dpw;
+    /* 短時間労働者用の様式には「勤務日」欄がある。週の勤務日数から埋める */
+    e.hdReg=comp.hdReg; e.hdIrr=comp.hdIrr; e.dpw=p.dpw;
+    e.workDays=dpw?('週'+dpw+'日'+(isShift?'（シフト表により指定）':'')):'';
     e.alv=a.days?String(a.days[0]):'';
     e.wageKind=wk; e.wageAmt=F(r,'金額');
     var al=parseAllow(F(r,'手当'));
@@ -429,9 +437,24 @@ function selAll(b){
 }
 
 /* ===== 印刷 ===== */
+/* PDFの保存ファイル名は、印刷時の document.title がそのまま使われる。
+   「労働条件通知書_会社名_氏名」になるよう、印刷の直前だけ差し替える */
+function pdfName(list){
+  var san=function(s){return String(s||'').replace(/[\\\/:*?"<>|]/g,'_').replace(/\s+/g,'').trim()};
+  var cos={};list.forEach(function(x){cos[x.comp.compName]=1});
+  var names=Object.keys(cos);
+  if(list.length===1)return '労働条件通知書_'+san(list[0].comp.compName)+'_'+san(list[0].emp.name);
+  if(names.length===1)return '労働条件通知書_'+san(names[0])+'_'+list.length+'名';
+  return '労働条件通知書_'+today().replace(/-/g,'')+'_'+names.length+'社'+list.length+'名';
+}
 function printRows(list){
   if(!list.length){alert('印刷する人が選ばれていません。');return}
   el('printArea').innerHTML=list.map(function(x){ S.comp=x.comp; return buildDoc(x.emp) }).join('');
+  var orig=document.title;
+  document.title=pdfName(list);
+  var back=function(){document.title=orig;window.removeEventListener('afterprint',back)};
+  window.addEventListener('afterprint',back);
+  setTimeout(back,60000);          /* afterprint が来ない環境の保険 */
   window.print();
 }
 function printOne(i){printRows([ROWS[i]])}
