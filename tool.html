@@ -3,93 +3,54 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>労働条件通知書 作成ツール</title>
+<title>労働条件通知書 出力ツール</title>
 <style>
   :root{--ink:#1b2a33;--sub:#5a6b74;--line:#dde6ea;--bg:#eef3f5;--card:#fff;
         --acc:#0e7c86;--acc-d:#0a5b62;--warn:#b5651d;--err:#c0392b;--ok:#1f8a5b;}
   *{box-sizing:border-box;margin:0;padding:0;-webkit-text-size-adjust:100%}
   body{font-family:"Hiragino Kaku Gothic ProN","Yu Gothic","Meiryo",system-ui,sans-serif;
-       background:var(--bg);color:var(--ink);font-size:16px;line-height:1.6;padding-bottom:100px}
+       background:var(--bg);color:var(--ink);font-size:16px;line-height:1.6;padding-bottom:40px}
   header{background:linear-gradient(135deg,#0e7c86,#0a5b62);color:#fff;padding:18px 16px}
-  header h1{font-size:18px;font-weight:800}
-  header p{font-size:12.5px;opacity:.93;margin-top:6px;line-height:1.5}
-  #stickytop{position:sticky;top:0;z-index:20}
-  .cobar{background:#0a5b62;color:#fff;padding:7px 10px;display:flex;align-items:center;gap:8px}
-  .cobar .k{font-size:11px;font-weight:700;opacity:.85;flex:0 0 auto;letter-spacing:.08em}
-  .cobar select{flex:1 1 auto;min-width:0;width:auto;padding:7px 9px;font-size:14px;font-weight:700;
-      border:none;border-radius:7px;background:#fff;color:var(--acc-d)}
-  .cobar .coadd{flex:0 0 auto;background:rgba(255,255,255,.18);color:#fff;border:1px solid rgba(255,255,255,.45);
-      border-radius:7px;padding:7px 10px;font-size:12.5px;font-weight:700;cursor:pointer;font-family:inherit;white-space:nowrap}
-  .cobar .coadd:active{background:rgba(255,255,255,.32)}
-  nav{background:#fff;border-bottom:1px solid var(--line);
-      display:flex;overflow-x:auto;-webkit-overflow-scrolling:touch}
-  nav button{flex:1 0 auto;min-width:96px;padding:13px 10px;border:none;background:none;font:inherit;
-      font-size:13px;font-weight:700;color:var(--sub);cursor:pointer;border-bottom:3px solid transparent}
-  nav button.on{color:var(--acc-d);border-bottom-color:var(--acc)}
-  .wrap{max-width:720px;margin:0 auto;padding:14px}
+  header h1{font-size:19px;font-weight:800}
+  header p{font-size:12.5px;opacity:.93;margin-top:6px}
+  .wrap{max-width:1000px;margin:0 auto;padding:14px}
   .card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px;margin:12px 0}
-  .card h2{font-size:15px;color:var(--acc-d);display:flex;align-items:center;gap:8px;margin-bottom:4px}
-  .card h2 .n{background:var(--acc);color:#fff;width:24px;height:24px;border-radius:50%;
-              display:inline-flex;align-items:center;justify-content:center;font-size:13px;flex:0 0 auto}
-  .card h3{font-size:13.5px;color:var(--acc-d);margin:20px 0 2px;padding-top:12px;border-top:1px dashed var(--line)}
-  .card h3.first{border-top:none;padding-top:0;margin-top:10px}
-  label{display:block;font-size:13px;font-weight:700;margin:12px 0 5px}
-  label .req{color:var(--err);font-size:11px;margin-left:4px}
-  label .new{background:#fdecc8;color:#7a5a1e;font-size:10px;padding:1px 5px;border-radius:4px;margin-left:5px}
-  .hint{font-size:12px;color:var(--sub);font-weight:400;margin-top:3px}
-  input,select,textarea{width:100%;border:1.5px solid #cfd9de;border-radius:9px;padding:11px;
-        font-size:16px;font-family:inherit;color:var(--ink);background:#fff}
-  input:focus,select:focus,textarea:focus{outline:none;border-color:var(--acc)}
-  textarea{min-height:62px;resize:vertical}
-  .row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-  .row3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
-  .row4{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:6px}
-  .chk{display:flex;gap:9px;align-items:flex-start;margin:8px 0;font-size:13.5px}
-  .chk input{width:21px;height:21px;flex:0 0 auto;margin-top:1px}
-  .chk label{margin:0;font-weight:400;font-size:13.5px}
-  .note{background:#fff7e6;border:1px solid #f0d9a8;border-left:4px solid var(--warn);
-        border-radius:9px;padding:11px 12px;font-size:12.5px;color:#7a5a1e;margin-top:10px}
-  .info{background:#eef7f8;border:1px solid #c8e6e8;border-left:4px solid var(--acc);
-        border-radius:9px;padding:11px 12px;font-size:12.5px;color:#0a5b62;margin-top:10px}
-  .calc{background:#f3f8f4;border:1px solid #cfe5d6;border-radius:9px;padding:12px;font-size:13px;color:#1a5e3c;margin-top:10px}
-  .calc .big{font-size:15px;font-weight:800}
-  .calc div{margin:2px 0}
-  .alert{background:#fdeeec;border:1px solid #f3c6c0;border-left:4px solid var(--err);
-        border-radius:9px;padding:11px 12px;font-size:12.5px;color:#8e2a1e;margin-top:10px}
-  .alert ul{margin:4px 0 0 18px}
-  .alert li{margin:3px 0}
-  .hide{display:none !important}
-  .btn{background:var(--acc);color:#fff;border:none;border-radius:10px;padding:13px;font-size:15px;
-       font-weight:800;cursor:pointer;font-family:inherit;width:100%}
+  .card h2{font-size:15px;color:var(--acc-d);display:flex;align-items:center;gap:9px;margin-bottom:8px}
+  .card h2 .n{background:var(--acc);color:#fff;width:25px;height:25px;border-radius:50%;flex:0 0 auto;
+              display:inline-flex;align-items:center;justify-content:center;font-size:13px;font-weight:700}
+  .hint{font-size:12.5px;color:var(--sub);line-height:1.6}
+  textarea{width:100%;min-height:150px;font-size:12px;line-height:1.6;padding:12px;border-radius:10px;
+           border:1.5px solid #cfd9de;font-family:"SF Mono",Consolas,monospace;white-space:pre;color:var(--ink);background:#fff}
+  textarea:focus{outline:none;border-color:var(--acc)}
+  .btn{background:var(--acc);color:#fff;border:none;border-radius:10px;padding:13px 18px;font-size:15px;
+       font-weight:800;cursor:pointer;font-family:inherit}
   .btn:active{background:var(--acc-d)}
   .btn:disabled{background:#a9c4c7;cursor:not-allowed}
-  .btn.g{background:var(--ok)}
-  .btn.gray{background:#64757d}
-  .btn.red{background:var(--err)}
-  .btn.sm{padding:8px 11px;font-size:12.5px;width:auto;border-radius:8px}
   .btn.out{background:#fff;color:var(--acc-d);border:1.5px solid var(--acc)}
-  .btns{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap}
-  .btns .btn{flex:1 0 auto;width:auto;min-width:130px}
-  .bar{position:fixed;bottom:0;left:0;right:0;background:#fff;border-top:1px solid var(--line);
-       padding:10px 14px;box-shadow:0 -3px 12px rgba(0,0,0,.06);z-index:30}
-  .bar .inner{max-width:720px;margin:0 auto;display:flex;gap:8px;align-items:center}
-  .bar .inner .btn{flex:1}
-  .msg{font-size:12px;color:var(--ok);text-align:center;min-height:17px;font-weight:700;margin-top:4px}
-  .msg.e{color:var(--err)}
-  table.list{width:100%;border-collapse:collapse;font-size:12.5px;margin-top:10px}
-  table.list th{background:#f4f8f9;border:1px solid var(--line);padding:7px 6px;text-align:left;font-size:11.5px;color:var(--sub)}
-  table.list td{border:1px solid var(--line);padding:7px 6px;vertical-align:middle}
+  .btn.sm{padding:7px 11px;font-size:12.5px;border-radius:8px;font-weight:700}
+  .btns{display:flex;gap:9px;margin-top:12px;flex-wrap:wrap;align-items:center}
+  .hide{display:none !important}
+  .note{background:#fff7e6;border:1px solid #f0d9a8;border-left:4px solid var(--warn);
+        border-radius:9px;padding:11px 12px;font-size:12.5px;color:#7a5a1e;margin-top:12px}
+  .err{background:#fdeeec;border:1px solid #f3c6c0;border-left:4px solid var(--err);
+       border-radius:9px;padding:12px 13px;font-size:13px;color:#8e2a1e;margin-top:12px}
+  .err b{display:block;margin-bottom:4px;font-size:14px}
+  .err ul{margin:6px 0 0 18px}
+  .ok{background:#f3f8f4;border:1px solid #cfe5d6;border-left:4px solid var(--ok);
+      border-radius:9px;padding:11px 12px;font-size:13px;color:#1a5e3c;margin-top:12px}
+  table.list{width:100%;border-collapse:collapse;font-size:12.5px;margin-top:12px}
+  table.list th{background:#f4f8f9;border:1px solid var(--line);padding:8px 7px;text-align:left;
+                font-size:11.5px;color:var(--sub);white-space:nowrap}
+  table.list td{border:1px solid var(--line);padding:8px 7px;vertical-align:top}
   table.list td.c{text-align:center;white-space:nowrap}
-  .pat{border:1.5px solid var(--line);border-radius:10px;padding:12px;margin:10px 0;background:#fafcfc}
-  .pat .ph{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:4px}
-  .pat .ph b{font-size:13.5px}
-  .tsv{width:100%;min-height:140px;font-size:11.5px;line-height:1.6;background:#0f2b30;color:#d8eef0;
-       border:none;border-radius:12px;padding:12px;font-family:"SF Mono",Consolas,monospace;margin-top:10px;white-space:pre}
-  .foot{font-size:11px;color:var(--sub);text-align:center;padding:16px;line-height:1.8}
-  .pill{display:inline-block;background:#e6f0f1;color:var(--acc-d);font-size:11px;font-weight:700;
-        padding:2px 8px;border-radius:999px;margin-left:6px}
-  .pill.w{background:#fdecc8;color:#7a5a1e}
-  .pill.n{background:#e8f3ec;color:#1a5e3c}
+  table.list tr.warn td{background:#fffaf2}
+  .co{font-weight:700;color:var(--acc-d)}
+  .tag{display:inline-block;font-size:10.5px;font-weight:700;padding:2px 7px;border-radius:999px;white-space:nowrap}
+  .tag.ippan{background:#e6f0f1;color:var(--acc-d)}
+  .tag.tanji{background:#fdecc8;color:#7a5a1e}
+  .w{color:#8e2a1e;font-size:11.5px;line-height:1.5}
+  .w b{color:#c0392b}
+  .foot{font-size:11px;color:var(--sub);text-align:center;padding:18px 16px;line-height:1.8}
 
   /* ===== 通知書（印刷用） ===== */
   #printArea{display:none}
@@ -129,1336 +90,355 @@
 </head>
 <body>
 <header>
-  <h1>労働条件通知書 作成ツール</h1>
-  <p>厚生労働省モデル様式（<b>令和8年10月1日以降に使用する版</b>／一般労働者用・短時間労働者用）に沿って下書きを作ります。入力はこの端末内だけで処理され、どこにも送信されません。</p>
+  <h1>労働条件通知書 出力ツール</h1>
+  <p>スプレッドシートの回答を貼り付けて、厚労省モデル様式（令和8年10月1日以降版）の通知書を出力します。社内用。</p>
 </header>
 
-<div id="stickytop">
-  <div class="cobar">
-    <span class="k">編集中</span>
-    <select id="coSel" onchange="coSwitch(this.value)" aria-label="編集中の会社"></select>
-    <button class="coadd" onclick="coAdd()">＋ 会社</button>
+<div class="wrap">
+
+<div class="card">
+  <h2><span class="n">1</span>スプレッドシートから貼り付ける</h2>
+  <div class="hint">
+    回答シートで <b>1行目（見出し）を含めて</b> 対象の行を選択してコピーし、下に貼り付けてください。<br>
+    複数社・複数名をまとめて貼っても構いません。会社ごとに自動で振り分けます。
   </div>
-  <nav>
-    <button id="tb1" class="on" onclick="tab(1)">① 会社設定</button>
-    <button id="tb2" onclick="tab(2)">② 勤務パターン</button>
-    <button id="tb3" onclick="tab(3)">③ 従業員入力</button>
-    <button id="tb4" onclick="tab(4)">④ 一覧・出力</button>
-  </nav>
+  <div class="note" style="margin-bottom:10px">
+    <b>見出し行を必ず含めてください。</b>見出しがないと、どの列が何なのか判定できません。
+    見出しなしで貼られた場合はエラーにします（推測で作ると、中身が全部ずれた通知書ができてしまうため）。
+  </div>
+  <textarea id="src" placeholder="ここに貼り付け（1行目＝見出し行）"></textarea>
+  <div class="btns">
+    <button class="btn" onclick="run()">読み込む</button>
+    <button class="btn out" onclick="clearAll()">消す</button>
+  </div>
+  <div id="msg"></div>
 </div>
 
-<!-- ============ ① 会社設定 ============ -->
-<div class="wrap" id="p1">
-  <div class="card" id="coCard">
-    <h2><span class="n">★</span>この会社</h2>
-    <div class="hint">1台のPCで複数社を扱えます。会社ごとに設定・勤務パターン・従業員は<b>完全に分かれます</b>。切替は上の青いバーから。</div>
-    <label>一覧での表示名</label>
-    <input id="coName" placeholder="（空欄なら事業場名称をそのまま使います）" onchange="coRename()">
-    <div class="btns">
-      <button class="btn out" onclick="coAdd()">＋ 新しい会社を追加</button>
-      <button class="btn out" onclick="coDup()">この会社を複製</button>
-      <button class="btn red" onclick="coDel()">この会社を削除</button>
-    </div>
-    <div class="hint">「複製」は会社設定と勤務パターンだけを引き継ぎます（従業員は空）。同じ会社の別事業場を作るときに使います。</div>
-    <div class="msg" id="coMsg"></div>
-  </div>
+<div class="card hide" id="resultCard">
+  <h2><span class="n">2</span>読み取り結果を確認する</h2>
+  <div class="hint">ここが想定と違っていたら、<b>印刷せずに</b>貼り付け直してください。</div>
+  <div id="list"></div>
+</div>
 
-  <div class="info">
-    <b>ここは会社ごとに1回だけ入力します。</b>以後は保存され、その会社の全従業員に自動で反映されます。入力の大半はこのタブで片付きます。
+<div class="card hide" id="printCard">
+  <h2><span class="n">3</span>通知書を出す</h2>
+  <div class="btns">
+    <button class="btn" onclick="printSel()">チェックした人の通知書を印刷（PDF保存）</button>
+    <button class="btn out sm" onclick="selAll(true)">全選択</button>
+    <button class="btn out sm" onclick="selAll(false)">全解除</button>
   </div>
-
-  <div class="card">
-    <h2><span class="n">1</span>事業場・使用者</h2>
-    <label>事業場名称<span class="req">必須</span></label>
-    <input id="c_compName" placeholder="株式会社○○　○○営業所">
-    <label>事業場所在地<span class="req">必須</span></label>
-    <input id="c_compAddr" placeholder="沖縄県那覇市○○1-2-3">
-    <label>使用者職氏名<span class="req">必須</span></label>
-    <input id="c_compRep" placeholder="代表取締役　山田太郎">
-  </div>
-
-  <div class="card">
-    <h2><span class="n">2</span>就業規則</h2>
-    <label>就業規則はありますか</label>
-    <select id="c_rulesHas" onchange="save()"><option>有</option><option>無</option></select>
-    <div class="hint">常時10人以上の労働者を使用する事業場は作成・届出が義務（労基法89条）。</div>
-    <label>就業規則を確認できる場所や方法</label>
-    <input id="c_rulesPlace" placeholder="事務所内の書棚に備付け／社内共有フォルダ">
-    <label>適用される就業規則名<span class="hint" style="display:inline">（短時間・有期の様式で使用）</span></label>
-    <input id="c_rulesName" placeholder="パートタイマー就業規則">
-    <h3>条番号（「○詳細は、就業規則第○条〜」の欄に入ります）</h3>
-    <div class="row">
-      <div><label>労働時間</label><input id="c_artTime" placeholder="第15条〜第19条"></div>
-      <div><label>休日</label><input id="c_artHoliday" placeholder="第20条〜第21条"></div>
-    </div>
-    <div class="row">
-      <div><label>休暇</label><input id="c_artVac" placeholder="第22条〜第28条"></div>
-      <div><label>賃金</label><input id="c_artWage" placeholder="第30条〜第42条"></div>
-    </div>
-    <label>退職・解雇</label>
-    <input id="c_artRetire" placeholder="第45条〜第50条">
-    <div class="note">内容が膨大になる場合は、労働時間・休日・休暇・退職の各欄は<b>就業規則の関係条項名を網羅的に示すことで足りる</b>（モデル様式 記載要領9・11）。条番号を入れておくと通知書が短くなります。</div>
-  </div>
-
-  <div class="card">
-    <h2><span class="n">3</span>賃金の共通ルール</h2>
-    <div class="row">
-      <div><label>賃金締切日<span class="req">必須</span></label><input id="c_payCut" placeholder="毎月末日"></div>
-      <div><label>賃金支払日<span class="req">必須</span></label><input id="c_payDay" placeholder="翌月25日"></div>
-    </div>
-    <label>賃金の支払方法</label>
-    <input id="c_payMethod" placeholder="本人名義の金融機関口座へ振込">
-    <label>労使協定に基づく賃金支払時の控除</label>
-    <input id="c_payDeduct" placeholder="無／社宅使用料・親睦会費 など">
-    <h3>割増賃金率（％）</h3>
-    <div class="hint" style="margin-bottom:6px">初期値は労基法37条の法定下限です。下回る値を入れると警告します。</div>
-    <div class="row3">
-      <div><label>法定超（月60時間以内）</label><input id="c_otLegal" type="number" inputmode="numeric" value="25"></div>
-      <div><label>法定超（月60時間超）</label><input id="c_otOver60" type="number" inputmode="numeric" value="50"></div>
-      <div><label>所定超（法定内）</label><input id="c_otSched" type="number" inputmode="numeric" value="25"></div>
-    </div>
-    <div class="row3">
-      <div><label>法定休日</label><input id="c_hdLegal" type="number" inputmode="numeric" value="35"></div>
-      <div><label>法定外休日</label><input id="c_hdNon" type="number" inputmode="numeric" value="25"></div>
-      <div><label>深夜</label><input id="c_night" type="number" inputmode="numeric" value="25"></div>
-    </div>
-    <div class="hint">※「所定超（法定内）」＝法定労働時間の範囲内の残業。割増の法律上の義務はないため、自社ルールの率を入れてください（0でも可）。</div>
-  </div>
-
-  <div class="card">
-    <h2><span class="n">4</span>休日・休暇の既定</h2>
-    <label>定例休日（既定）</label>
-    <input id="c_hdReg" placeholder="毎週土曜日・日曜日、国民の祝日">
-    <label>非定例休日（既定）</label>
-    <input id="c_hdIrr" placeholder="週・月当たり○日／シフトによる">
-    <h3>年次有給休暇の付随制度</h3>
-    <div class="row">
-      <div><label>継続勤務6か月以内の付与</label><input id="c_avEarly" placeholder="無／3か月経過で5日"></div>
-      <div><label>時間単位年休</label><select id="c_avHour"><option>無</option><option>有</option></select></div>
-    </div>
-    <label>代替休暇</label>
-    <select id="c_avAlt"><option>無</option><option>有</option></select>
-    <div class="hint">時間単位年休・代替休暇はいずれも労使協定が前提です。</div>
-    <div class="row">
-      <div><label>その他の休暇（有給）</label><input id="c_vacPaid" placeholder="慶弔休暇、産前産後休業"></div>
-      <div><label>その他の休暇（無給）</label><input id="c_vacUnpaid" placeholder="育児・介護休業、生理休暇"></div>
-    </div>
-  </div>
-
-  <div class="card">
-    <h2><span class="n">5</span>退職に関する事項</h2>
-    <div class="row">
-      <div><label>定年制</label><input id="c_retire" placeholder="有（65歳）／無"></div>
-      <div><label>継続雇用制度</label><input id="c_contEmp" placeholder="有（70歳まで）／無"></div>
-    </div>
-    <label>創業支援等措置</label>
-    <input id="c_founder" placeholder="無／有（70歳まで業務委託）">
-    <label>自己都合退職の届出日数</label>
-    <input id="c_quitDays" type="number" inputmode="numeric" value="14">
-    <div class="hint">「退職する○日以上前に届け出ること」の○に入ります。</div>
-    <label>解雇の事由及び手続<span class="req">書面明示が義務</span></label>
-    <textarea id="c_dismissal" placeholder="就業規則第○条に定める事由に該当する場合、30日前に予告するか平均賃金の30日分以上の解雇予告手当を支払って解雇することがある。"></textarea>
-    <div class="note">定年を定める場合は<b>60歳を下回れません</b>（高年齢者雇用安定法8条）。65歳未満の定年を定める場合は65歳までの雇用確保措置が必要です。</div>
-  </div>
-
-  <div class="card">
-    <h2><span class="n">6</span>社会保険・その他</h2>
-    <div class="row3">
-      <div><label>厚生年金</label><select id="c_siKosei"><option>有</option><option>無</option></select></div>
-      <div><label>健康保険</label><select id="c_siKenpo"><option>有</option><option>無</option></select></div>
-      <div><label>雇用保険（既定）</label><select id="c_empInsDef"><option>有</option><option>無</option></select></div>
-    </div>
-    <label>社会保険その他</label>
-    <input id="c_siOther" placeholder="厚生年金基金 など（なければ空欄）">
-    <div class="row">
-      <div><label>中小企業退職金共済</label><select id="c_chutaikyo"><option>加入していない</option><option>加入している</option></select></div>
-      <div><label>企業年金制度</label><input id="c_pension" placeholder="無／有（企業型DC）"></div>
-    </div>
-    <h3>待遇の相違の説明を求める窓口<span class="new">令和8年10月1日からの追加</span></h3>
-    <div class="hint" style="margin-bottom:6px">短時間・有期雇用労働者に対し、通常の労働者との待遇の相違（内容・理由）等について説明を求められることを明示する義務があります。</div>
-    <div class="row3">
-      <div><label>部署名</label><input id="c_w1dept" placeholder="総務課"></div>
-      <div><label>担当者職氏名</label><input id="c_w1name" placeholder="課長　○○"></div>
-      <div><label>連絡先</label><input id="c_w1tel" placeholder="098-000-0000"></div>
-    </div>
-    <h3>雇用管理の改善等に関する相談窓口</h3>
-    <label>上の窓口と同じですか</label>
-    <select id="c_w2same" onchange="save();render()"><option>同じ（同上と記載）</option><option>別に設ける</option></select>
-    <div id="w2box" class="hide">
-      <div class="row3">
-        <div><label>部署名</label><input id="c_w2dept"></div>
-        <div><label>担当者職氏名</label><input id="c_w2name"></div>
-        <div><label>連絡先</label><input id="c_w2tel"></div>
-      </div>
-    </div>
-  </div>
-
-  <div class="card">
-    <h2><span class="n">7</span>従業員入力の既定値</h2>
-    <div class="hint">③で毎回入れずに済むよう、よく使う値をここに入れておきます。</div>
-    <label>就業の場所（雇入れ直後）の既定</label>
-    <input id="c_placeDef" placeholder="株式会社○○　本社（沖縄県那覇市○○1-2-3）">
-    <label>就業の場所（変更の範囲）の既定<span class="new">2024年4月からの必須明示</span></label>
-    <input id="c_place2Def" placeholder="会社の定める全ての事業所（沖縄県内）">
-    <div class="row3">
-      <div><label>昇給</label><input id="c_raiseDef" placeholder="有（毎年4月、評価による）"></div>
-      <div><label>賞与</label><input id="c_bonusDef" placeholder="有（7月・12月）"></div>
-      <div><label>退職金</label><input id="c_severDef" placeholder="無"></div>
-    </div>
-  </div>
-
-  <div class="card">
-    <h2><span class="n">8</span>チェック用の設定（通知書には印字されません）</h2>
-    <label>適用される地域別最低賃金（時間額・円）</label>
-    <input id="c_minWage" type="number" inputmode="numeric" placeholder="例 1086">
-    <div class="note">最低賃金は<b>都道府県ごとに額も発効日も異なり毎年改定される</b>ため、額はあえて埋め込んでいません。<a href="https://www.mhlw.go.jp/stf/seisakunitsuite/bunya/koyou_roudou/roudoukijun/minimumichiran/" target="_blank" rel="noopener">厚生労働省「地域別最低賃金の全国一覧」</a>で確認して入力してください。空欄のままなら最低賃金の判定は行いません。</div>
-    <div class="row">
-      <div><label>従業員51人以上の特定適用事業所か</label><select id="c_isLarge"><option>いいえ</option><option>はい</option></select></div>
-      <div><label>36協定を届け出ているか</label><select id="c_has36"><option>はい</option><option>いいえ</option></select></div>
-    </div>
-  </div>
-
-  <div class="card">
-    <h2><span class="n">9</span>設定のバックアップ</h2>
-    <div class="hint">ブラウザに自動保存されますが、PCを変える・担当者に渡すときはファイルで受け渡します。従業員データも含まれます。</div>
-    <div class="btns">
-      <button class="btn out" onclick="dlJson()">全社まとめて保存</button>
-      <button class="btn out" onclick="dlJsonOne()">この会社だけ保存</button>
-      <button class="btn out" onclick="document.getElementById('upJson').click()">ファイルから読込</button>
-      <button class="btn red" onclick="resetAll()">すべて消す</button>
-    </div>
-    <div class="hint">読込は中身で動きが変わります。<b>全社ファイル＝丸ごと置き換え</b>（確認あり）、<b>1社ファイル＝新しい会社として追加</b>（いまの会社は消えません）。</div>
-    <input type="file" id="upJson" accept=".json" class="hide" onchange="ldJson(this)">
+  <div class="note">
+    <b>印刷ダイアログでの設定</b><br>
+    送信先＝<b>PDFに保存</b>／用紙＝A4／余白＝既定／倍率＝100%／<b>背景のグラフィック＝オン</b><br>
+    <b>「ヘッダーとフッター」のチェックは外してください。</b>外さないと、日付・URL・ページ番号が紙に印字されます。
   </div>
 </div>
 
-<!-- ============ ② 勤務パターン ============ -->
-<div class="wrap hide" id="p2">
-  <div class="info">
-    勤務の型を登録しておくと、③では<b>選ぶだけで「始業・終業・休憩・所定時間外・休日・週所定労働日数」の6項目が一括で入ります。</b>人ごとの上書きもできます。
-  </div>
-  <div id="patList"></div>
-  <div class="card">
-    <h2><span class="n">＋</span>パターンを追加・編集</h2>
-    <label>パターン名<span class="req">必須</span></label>
-    <input id="pt_name" placeholder="常勤（9:00-18:00／土日祝休）">
-    <div class="row3">
-      <div><label>始業</label><input id="pt_start" type="time" value="09:00"></div>
-      <div><label>終業</label><input id="pt_end" type="time" value="18:00"></div>
-      <div><label>休憩（分）</label><input id="pt_brk" type="number" inputmode="numeric" value="60"></div>
-    </div>
-    <label>変形労働時間制等</label>
-    <select id="pt_varType">
-      <option>なし（通常の勤務）</option>
-      <option>1か月単位の変形労働時間制</option>
-      <option>1年単位の変形労働時間制</option>
-      <option>交替制</option>
-      <option>フレックスタイム制</option>
-      <option>事業場外みなし労働時間制</option>
-      <option>裁量労働制</option>
-    </select>
-    <div class="row">
-      <div><label>所定時間外労働</label><select id="pt_otYes"><option>有</option><option>無</option></select></div>
-      <div><label>週所定労働日数</label><select id="pt_dpw">
-        <option value="5">週5日</option><option value="6">週6日</option><option value="4">週4日</option>
-        <option value="3">週3日</option><option value="2">週2日</option><option value="1">週1日</option>
-      </select></div>
-    </div>
-    <label>定例休日</label>
-    <input id="pt_hdReg" placeholder="毎週土曜日・日曜日、国民の祝日">
-    <label>非定例休日</label>
-    <input id="pt_hdIrr" placeholder="週・月当たり○日／シフトによる">
-    <label>勤務日<span class="hint" style="display:inline">（短時間労働者の様式で使用）</span></label>
-    <input id="pt_workDays" placeholder="毎週月・水・金曜日">
-    <h3>短時間労働者の様式で使う上限（任意）</h3>
-    <div class="row3">
-      <div><label>所定外 1週</label><input id="pt_otW" type="number" inputmode="numeric" placeholder="時間"></div>
-      <div><label>所定外 1か月</label><input id="pt_otM" type="number" inputmode="numeric" placeholder="時間"></div>
-      <div><label>所定外 1年</label><input id="pt_otY" type="number" inputmode="numeric" placeholder="時間"></div>
-    </div>
-    <div class="row">
-      <div><label>休日労働 1か月</label><input id="pt_hdwM" type="number" inputmode="numeric" placeholder="日"></div>
-      <div><label>休日労働 1年</label><input id="pt_hdwY" type="number" inputmode="numeric" placeholder="日"></div>
-    </div>
-    <div id="ptCalc"></div>
-    <div class="btns">
-      <button class="btn" onclick="patSave()" id="ptSaveBtn">このパターンを追加</button>
-      <button class="btn gray hide" onclick="patNew()" id="ptNewBtn">新規入力に戻す</button>
-    </div>
-    <div class="msg" id="ptMsg"></div>
-  </div>
-</div>
-
-<!-- ============ ③ 従業員入力 ============ -->
-<div class="wrap hide" id="p3">
-  <div class="info" id="e_mode">新しい従業員を入力します。</div>
-
-  <div class="card">
-    <h2><span class="n">1</span>基本</h2>
-    <div class="row">
-      <div><label>氏名<span class="req">必須</span></label><input id="e_name" placeholder="山田　花子"></div>
-      <div><label>交付日</label><input id="e_issue" type="date"></div>
-    </div>
-    <label>雇用区分</label>
-    <select id="e_kubun" onchange="kubunChange()">
-      <option>正社員</option><option>契約社員（有期）</option><option>パート・アルバイト</option><option>その他</option>
-    </select>
-    <label>使用する様式</label>
-    <select id="e_form" onchange="render()">
-      <option>一般労働者用（常用、有期雇用型）</option>
-      <option>短時間労働者用（常用、有期雇用型）</option>
-    </select>
-    <div class="hint">1週間の所定労働時間が通常の労働者より短い人は<b>短時間労働者用</b>を使います（所定外労働の上限欄・勤務日欄が増えます）。</div>
-  </div>
-
-  <div class="card">
-    <h2><span class="n">2</span>契約期間</h2>
-    <label>期間の定め</label>
-    <select id="e_termHas" onchange="render()"><option>期間の定めなし</option><option>期間の定めあり</option></select>
-    <div id="termBox" class="hide">
-      <div class="row">
-        <div><label>契約開始日</label><input id="e_termFrom" type="date" onchange="render()"></div>
-        <div><label>契約終了日</label><input id="e_termTo" type="date" onchange="render()"></div>
-      </div>
-      <label>契約の更新の有無</label>
-      <select id="e_renewKind">
-        <option>更新する場合があり得る</option><option>自動的に更新する</option>
-        <option>契約の更新はしない</option><option>その他</option>
-      </select>
-      <label>契約の更新の判断基準<span class="hint" style="display:inline">（複数選択可）</span></label>
-      <div class="chk"><input type="checkbox" id="e_rc1"><label for="e_rc1">契約期間満了時の業務量</label></div>
-      <div class="chk"><input type="checkbox" id="e_rc2"><label for="e_rc2">勤務成績、態度</label></div>
-      <div class="chk"><input type="checkbox" id="e_rc3"><label for="e_rc3">能力</label></div>
-      <div class="chk"><input type="checkbox" id="e_rc4"><label for="e_rc4">会社の経営状況</label></div>
-      <div class="chk"><input type="checkbox" id="e_rc5"><label for="e_rc5">従事している業務の進捗状況</label></div>
-      <input id="e_rcOther" placeholder="その他の基準（任意）">
-      <label>更新上限<span class="new">2024年4月からの必須明示</span></label>
-      <input id="e_limitTxt" placeholder="無／更新3回まで／通算契約期間5年まで">
-      <label>通算契約期間が5年を超える契約か（無期転換申込機会）</label>
-      <select id="e_muki" onchange="render()"><option>該当しない</option><option>該当する</option></select>
-      <div id="mukiCalc"></div>
-    </div>
-  </div>
-
-  <div class="card">
-    <h2><span class="n">3</span>就業の場所・業務</h2>
-    <label>就業の場所（雇入れ直後）<span class="req">必須</span></label>
-    <input id="e_place1">
-    <label>就業の場所（変更の範囲）<span class="new">2024年4月からの必須明示</span></label>
-    <input id="e_place2">
-    <div class="btns"><button class="btn out sm" onclick="useDefPlace()">会社設定の既定を入れる</button></div>
-    <label>従事すべき業務の内容（雇入れ直後）<span class="req">必須</span></label>
-    <input id="e_job1" placeholder="フロント業務、客室清掃の管理">
-    <label>従事すべき業務の内容（変更の範囲）<span class="new">2024年4月からの必須明示</span></label>
-    <input id="e_job2" placeholder="会社の定める業務全般">
-    <div class="note">「変更の範囲」は<b>将来の配置転換などで変わり得る範囲</b>です。限定しないなら「会社の定める業務全般」「会社の定める全ての事業所」等と書きます。限定するなら限定した内容を書きます（書いた範囲を超える変更はできなくなる点に注意）。</div>
-  </div>
-
-  <div class="card">
-    <h2><span class="n">4</span>勤務時間・休日</h2>
-    <label>勤務パターンから入れる</label>
-    <select id="e_patPick" onchange="applyPat()"><option value="">（選択してください）</option></select>
-    <div class="hint">選ぶと下の6項目が一括で入ります。この人だけ違う場合は下を直接書き換えてください。</div>
-    <div class="row3">
-      <div><label>始業</label><input id="e_start" type="time" onchange="render()"></div>
-      <div><label>終業</label><input id="e_end" type="time" onchange="render()"></div>
-      <div><label>休憩（分）</label><input id="e_brk" type="number" inputmode="numeric" onchange="render()"></div>
-    </div>
-    <label>変形労働時間制等</label>
-    <select id="e_varType" onchange="render()">
-      <option>なし（通常の勤務）</option>
-      <option>1か月単位の変形労働時間制</option>
-      <option>1年単位の変形労働時間制</option>
-      <option>交替制</option>
-      <option>フレックスタイム制</option>
-      <option>事業場外みなし労働時間制</option>
-      <option>裁量労働制</option>
-    </select>
-    <div class="row">
-      <div><label>所定時間外労働</label><select id="e_otYes" onchange="render()"><option>有</option><option>無</option></select></div>
-      <div><label>週所定労働日数</label><select id="e_dpw" onchange="render()">
-        <option value="5">週5日</option><option value="6">週6日</option><option value="4">週4日</option>
-        <option value="3">週3日</option><option value="2">週2日</option><option value="1">週1日</option>
-      </select></div>
-    </div>
-    <div id="otLimBox" class="hide">
-      <h3>所定外労働・休日労働の上限（短時間労働者用の様式）</h3>
-      <div class="row3">
-        <div><label>所定外 1週</label><input id="e_otW" type="number" inputmode="numeric" placeholder="時間"></div>
-        <div><label>所定外 1か月</label><input id="e_otM" type="number" inputmode="numeric" placeholder="時間"></div>
-        <div><label>所定外 1年</label><input id="e_otY" type="number" inputmode="numeric" placeholder="時間"></div>
-      </div>
-      <div class="row">
-        <div><label>休日労働 1か月</label><input id="e_hdwM" type="number" inputmode="numeric" placeholder="日"></div>
-        <div><label>休日労働 1年</label><input id="e_hdwY" type="number" inputmode="numeric" placeholder="日"></div>
-      </div>
-    </div>
-    <label>定例休日</label>
-    <input id="e_hdReg">
-    <label>非定例休日</label>
-    <input id="e_hdIrr">
-    <div id="workDaysBox" class="hide">
-      <label>勤務日</label>
-      <input id="e_workDays" placeholder="毎週月・水・金曜日">
-    </div>
-    <label>年次有給休暇（6か月継続勤務した場合）</label>
-    <input id="e_alv" type="number" inputmode="numeric">
-    <div id="alvCalc"></div>
-  </div>
-
-  <div class="card">
-    <h2><span class="n">5</span>賃金</h2>
-    <div class="row">
-      <div><label>基本賃金の区分</label><select id="e_wageKind" onchange="render()">
-        <option>月給</option><option>時間給</option><option>日給</option>
-        <option>出来高給</option><option>就業規則に規定されている賃金等級等</option><option>その他</option>
-      </select></div>
-      <div><label>額（円・カンマなし）</label><input id="e_wageAmt" type="number" inputmode="numeric" onchange="render()" placeholder="220000"></div>
-    </div>
-    <h3>諸手当（最大4件・任意）</h3>
-    <div class="hint" style="margin-bottom:6px">「名称 / 額 / 計算方法」の順に、スラッシュ区切りで書いてください。例：通勤手当 / 10000 / 実費（上限月1万円）</div>
-    <input id="e_al1" placeholder="通勤手当 / 10000 / 実費（上限月1万円）" style="margin-bottom:6px">
-    <input id="e_al2" placeholder="役職手当 / 20000 /" style="margin-bottom:6px">
-    <input id="e_al3" style="margin-bottom:6px">
-    <input id="e_al4">
-    <h3>昇給・賞与・退職金</h3>
-    <div class="row3">
-      <div><label>昇給</label><input id="e_raise"></div>
-      <div><label>賞与</label><input id="e_bonus"></div>
-      <div><label>退職金</label><input id="e_sever"></div>
-    </div>
-    <div id="wageCalc"></div>
-  </div>
-
-  <div class="card">
-    <h2><span class="n">6</span>その他</h2>
-    <label>雇用保険の適用</label>
-    <select id="e_empIns"><option>有</option><option>無</option></select>
-    <div id="insCalc"></div>
-    <label>その他特記事項</label>
-    <textarea id="e_other" placeholder="試用期間3か月（労働条件は同じ）など"></textarea>
-  </div>
-
-  <div id="checkBox"></div>
-</div>
-
-<!-- ============ ④ 一覧・出力 ============ -->
-<div class="wrap hide" id="p4">
-  <div class="card">
-    <h2><span class="n">1</span>登録した従業員</h2>
-    <div class="info" id="coNote4"></div>
-    <div id="empList"></div>
-    <div class="btns">
-      <button class="btn" onclick="printSel()">チェックした人の通知書を印刷（PDF保存）</button>
-      <button class="btn out" onclick="selAll(true)">全選択</button>
-      <button class="btn out" onclick="selAll(false)">全解除</button>
-    </div>
-    <div class="note">印刷ダイアログで「送信先／プリンター」を<b>「PDFに保存」</b>にするとPDFになります。用紙A4・余白「既定」・倍率100%・「背景のグラフィック」オンを推奨。</div>
-  </div>
-
-  <div class="card" style="border:2px solid var(--acc)">
-    <h2><span class="n">★</span>事業者フォームの回答を取り込む</h2>
-    <div class="hint">スプレッドシート（またはLINEで届いたテキスト）から<b>見出し行を含めて</b>コピーし、下に貼り付けてください。
-      会社ごとに自動で振り分け、<b>フォームで聞いていない項目（割増賃金率・年休・解雇事由・相談窓口など）は法定どおりの内容で自動的に補います。</b></div>
-    <textarea class="tsv" id="formIn" placeholder="ここに貼り付け（複数社・複数行まとめて可）" style="background:#fff;color:var(--ink);border:1.5px solid #cfd9de;font-size:12px"></textarea>
-    <div class="btns"><button class="btn" onclick="importForm()">取り込む</button></div>
-    <div class="msg" id="formMsg"></div>
-  </div>
-
-  <div class="card">
-    <h2><span class="n">2</span>スプレッドシートへ（従業員）</h2>
-    <div class="hint">TSV（タブ区切り）です。コピーしてスプレッドシートのA1に貼ると列に分かれます。</div>
-    <div class="btns">
-      <button class="btn g" onclick="copyTsv('emp')">従業員TSVをコピー</button>
-      <button class="btn out" onclick="showTsv('emp')">表示する</button>
-    </div>
-    <div class="msg" id="tsvMsg1"></div>
-    <textarea class="tsv hide" id="tsvEmp" readonly></textarea>
-    <h3>スプレッドシートから取り込む</h3>
-    <div class="hint">スプレッドシートの範囲（見出し行を含む）をコピーして、下に貼り付けてください。<b>現在の従業員一覧は置き換わります。</b></div>
-    <textarea class="tsv" id="tsvEmpIn" placeholder="ここに貼り付け" style="background:#fff;color:var(--ink);border:1.5px solid #cfd9de;font-size:12px"></textarea>
-    <div class="btns"><button class="btn gray" onclick="importTsv('emp')">貼り付けた内容を取り込む</button></div>
-    <div class="msg" id="impMsg1"></div>
-  </div>
-
-  <div class="card">
-    <h2><span class="n">3</span>スプレッドシートへ（会社設定）</h2>
-    <div class="hint">会社設定は<b>見出し行＋1行</b>です。従業員シートと別シートにしてください（全行に繰り返さないことで列の爆発と転記ミスを防ぎます）。</div>
-    <div class="btns">
-      <button class="btn g" onclick="copyTsv('comp')">会社設定TSVをコピー</button>
-      <button class="btn out" onclick="showTsv('comp')">表示する</button>
-    </div>
-    <div class="msg" id="tsvMsg2"></div>
-    <textarea class="tsv hide" id="tsvComp" readonly></textarea>
-    <h3>スプレッドシートから取り込む</h3>
-    <textarea class="tsv" id="tsvCompIn" placeholder="ここに貼り付け（見出し行＋1行）" style="background:#fff;color:var(--ink);border:1.5px solid #cfd9de;font-size:12px"></textarea>
-    <div class="btns"><button class="btn gray" onclick="importTsv('comp')">貼り付けた内容を取り込む</button></div>
-    <div class="msg" id="impMsg2"></div>
-  </div>
-
-  <div class="card">
-    <h2><span class="n">4</span>この書類についての注意</h2>
-    <div class="note">
-      <b>出力されるのは下書きです。</b>内容の最終確認と労働者への交付は事業者ご自身で行ってください。<br>
-      ・労働条件通知書は、労働条件の決定について権限をもつ者が作成し、本人に交付します<br>
-      ・書面交付のほか、労働者が希望する場合はFAX・電子メール等（出力して書面を作成できるものに限る）でも明示できます<br>
-      ・退職金・臨時の賃金・労働者負担・安全衛生・職業訓練・災害補償・表彰制裁・休職は、<b>制度として設けている場合</b>に明示義務があります（口頭でも可）<br>
-      ・労使間の紛争の未然防止のため、交付した通知書は保存してください
-    </div>
+<div class="card">
+  <h2><span class="n">★</span>聞いていない項目の扱い</h2>
+  <div class="hint">
+    入力フォームでは法定の最低限しか聞いていません。次の項目は、<b>このツールが法定どおりの内容で自動的に補います</b>。<br><br>
+    割増賃金率（時間外25%／月60時間超50%／法定休日35%／深夜25%）／年次有給休暇の付与日数（週の勤務日数から比例付与を計算）／
+    賃金の支払方法（口座振込）／自己都合退職の手続（14日以上前に届出）／解雇の事由及び手続（定型文）／
+    相談窓口（代表者名と電話番号から生成）／使用する様式（週の所定労働時間から一般・短時間を判定）／
+    無期転換申込ができる日（契約末日の翌日）
   </div>
 </div>
 
 <div class="foot">
   根拠様式：厚生労働省「労働条件通知書」モデル様式（令和8年10月1日以降に使用する版）／労働基準法15条・労働基準法施行規則5条1〜4項、パートタイム・有期雇用労働法6条<br>
-  本ツールは事業者ご自身が入力・出力してお使いいただくものです。作成代行・報酬の受領は行いません。判断に迷う点は所轄の労働基準監督署または社会保険労務士にご確認ください。
+  出力は下書きです。内容の最終確認と労働者への交付は事業者ご自身で行っていただきます。
 </div>
-
-<div class="bar"><div class="inner">
-  <button class="btn" id="mainBtn" onclick="mainAct()">保存</button>
-</div></div>
+</div>
 
 <div id="printArea"></div>
 
 <script>
-/* ========== 定数 ========== */
-var LS  = 'rodojoken_tool_v1';   /* 旧：1社だけ保存していた形式。移行のためだけに読む */
-var LS2 = 'rodojoken_tool_v2';   /* 現行：会社（案件）スロットを複数持つ形式 */
+/* ===== 入力フォームが出す列（入力フォーム_事業者用.html の COLS と一致させること） ===== */
+var COLS=['送信日時','事業場名称','事業場所在地','代表者職氏名','電話番号','就業規則','就業規則の場所',
+ '就業場所の変更の範囲','業務の変更の範囲','賃金締切日','賃金支払日','休日','定年','社会保険',
+ 'パート昇給','パート賞与','パート退職金',
+ '氏名','雇入れ日','雇用の形','契約開始日','契約終了日','仕事の内容',
+ '勤務パターン名','始業','終業','休憩分','週勤務日数','残業','勤務時間の形',
+ '給与の種類','金額','手当'];
+/* これが1つでも欠けていたら、見出し行として認めない */
+var MUST=['事業場名称','氏名','雇用の形','仕事の内容','始業','終業','休憩分','週勤務日数','給与の種類','金額'];
 
-var COMPCOLS = [
- ['compName','事業場名称'],['compAddr','事業場所在地'],['compRep','使用者職氏名'],
- ['rulesHas','就業規則'],['rulesPlace','就業規則の確認場所・方法'],['rulesName','適用される就業規則名'],
- ['artTime','条_労働時間'],['artHoliday','条_休日'],['artVac','条_休暇'],['artWage','条_賃金'],['artRetire','条_退職'],
- ['payCut','賃金締切日'],['payDay','賃金支払日'],['payMethod','賃金の支払方法'],['payDeduct','控除(労使協定)'],
- ['otLegal','割増_法定超'],['otOver60','割増_月60時間超'],['otSched','割増_所定超'],
- ['hdLegal','割増_法定休日'],['hdNon','割増_法定外休日'],['night','割増_深夜'],
- ['hdReg','既定_定例休日'],['hdIrr','既定_非定例休日'],
- ['avEarly','年休_6か月以内付与'],['avHour','時間単位年休'],['avAlt','代替休暇'],
- ['vacPaid','その他の休暇_有給'],['vacUnpaid','その他の休暇_無給'],
- ['retire','定年制'],['contEmp','継続雇用制度'],['founder','創業支援等措置'],
- ['quitDays','自己都合退職_届出日数'],['dismissal','解雇の事由及び手続'],
- ['siKosei','社保_厚生年金'],['siKenpo','社保_健康保険'],['siOther','社保_その他'],['empInsDef','雇用保険_既定'],
- ['chutaikyo','中小企業退職金共済'],['pension','企業年金制度'],
- ['w1dept','窓口1_部署'],['w1name','窓口1_担当者'],['w1tel','窓口1_連絡先'],
- ['w2same','窓口2_同上か'],['w2dept','窓口2_部署'],['w2name','窓口2_担当者'],['w2tel','窓口2_連絡先'],
- ['raiseDef','既定_昇給'],['bonusDef','既定_賞与'],['severDef','既定_退職金'],
- ['placeDef','既定_就業の場所'],['place2Def','既定_変更の範囲'],
- ['minWage','最低賃金_時間額'],['isLarge','特定適用事業所'],['has36','36協定']
-];
+var DISMISS_DEFAULT='次のいずれかに該当する場合は解雇することがある。①勤務成績又は業務能率が著しく不良で、向上の見込みがないと認められるとき　②精神又は身体の障害により業務に耐えられないと認められるとき　③事業の運営上やむを得ない事情により、事業の縮小又は部門の閉鎖等を行う必要が生じたとき　④その他前各号に準ずるやむを得ない事由があるとき。解雇する場合は、少なくとも30日前に予告するか、平均賃金の30日分以上の解雇予告手当を支払う。';
 
-var EMPCOLS = [
- ['name','氏名'],['issue','交付日'],['kubun','雇用区分'],['form','様式'],
- ['termHas','期間の定め'],['termFrom','契約開始日'],['termTo','契約終了日'],
- ['renewKind','契約更新の有無'],['renewCriteria','更新の判断基準'],['limitTxt','更新上限'],['muki','無期転換申込機会'],
- ['place1','就業の場所_雇入れ直後'],['place2','就業の場所_変更の範囲'],
- ['job1','業務_雇入れ直後'],['job2','業務_変更の範囲'],
- ['patName','勤務パターン'],['start','始業'],['end','終業'],['brk','休憩分'],['varType','変形労働時間制等'],
- ['otYes','所定時間外労働'],['otW','所定外上限_週'],['otM','所定外上限_月'],['otY','所定外上限_年'],
- ['hdwM','休日労働_月'],['hdwY','休日労働_年'],
- ['hdReg','定例休日'],['hdIrr','非定例休日'],['workDays','勤務日'],['dpw','週所定労働日数'],['alv','年休_6か月経過後'],
- ['wageKind','基本賃金_区分'],['wageAmt','基本賃金_額'],
- ['al1','手当1'],['al2','手当2'],['al3','手当3'],['al4','手当4'],
- ['raise','昇給'],['bonus','賞与'],['sever','退職金'],['empIns','雇用保険'],['other','その他特記']
-];
+/* 年次有給休暇（労基法39条・労基則24条の3） */
+var ALV_FULL=[10,11,12,14,16,18,20];
+var ALV_PROP={4:[7,8,9,10,12,13,15],3:[5,6,6,8,9,10,11],2:[3,4,4,5,6,6,7],1:[1,2,2,2,3,3,3]};
 
-var PATKEYS = ['name','start','end','brk','varType','otYes','dpw','hdReg','hdIrr','workDays','otW','otM','otY','hdwM','hdwY'];
+var S={comp:{}};      /* buildDoc が参照する「いまの会社」 */
+var ROWS=[];          /* 読み取った全員 [{comp, emp, warn}] */
 
-var RC = ['契約期間満了時の業務量','勤務成績、態度','能力','会社の経営状況','従事している業務の進捗状況'];
-
-/* 年次有給休暇（労基法39条・労基則24条の3）6か月／1.5年／2.5年／3.5年／4.5年／5.5年／6.5年以上 */
-var ALV_FULL = [10,11,12,14,16,18,20];
-var ALV_PROP = {4:[7,8,9,10,12,13,15],3:[5,6,6,8,9,10,11],2:[3,4,4,5,6,6,7],1:[1,2,2,2,3,3,3]};
-
-/* S = いま画面で編集している1社ぶん。CO = 全社ぶんの保管庫 */
-var S = {comp:{}, pats:[], emps:[], editEmp:-1, editPat:-1, curTab:1};
-var CO = {cur:'', cos:{}};   /* cos[id] = {label, comp, pats, emps, updated} */
-var DEF = {};                /* HTMLに書いてある初期値（割増率の法定下限など）。新規会社の初期状態に使う */
-/* 年休日数を手で直したかどうか。手入力していない間は勤務条件の変更に追従して自動計算する */
-var alvTouched = false;
-
-/* ========== 小道具 ========== */
+/* ===== 小道具 ===== */
 function el(id){return document.getElementById(id)}
-function gv(id){var e=el(id);return e?String(e.value).trim():''}
-function sv(id,v){var e=el(id);if(e)e.value=(v===undefined||v===null)?'':v}
+function gv(id){var e=el(id);return e?String(e.value):''}
 function esc(s){return String(s===undefined||s===null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}
 function num(v){var n=parseFloat(v);return isFinite(n)?n:null}
 function show(id,b){var e=el(id);if(e)e.classList[b?'remove':'add']('hide')}
-function msg(id,t,isErr){var e=el(id);if(!e)return;e.textContent=t;e.className='msg'+(isErr?' e':'');if(t)setTimeout(function(){if(e.textContent===t)e.textContent=''},4000)}
 function today(){var d=new Date();return d.getFullYear()+'-'+('0'+(d.getMonth()+1)).slice(-2)+'-'+('0'+d.getDate()).slice(-2)}
-function jpDate(iso){if(!iso)return '';var m=/^(\d{4})-(\d{2})-(\d{2})$/.exec(iso);if(!m)return iso;return m[1]+'年'+(+m[2])+'月'+(+m[3])+'日'}
-function addDays(iso,n){var m=/^(\d{4})-(\d{2})-(\d{2})$/.exec(iso);if(!m)return '';var d=new Date(+m[1],+m[2]-1,+m[3]);d.setDate(d.getDate()+n);
+function jpDate(iso){if(!iso)return '';var m=/^(\d{4})-(\d{1,2})-(\d{1,2})$/.exec(String(iso).trim());
+  if(m)return m[1]+'年'+(+m[2])+'月'+(+m[3])+'日';
+  var s=/^(\d{4})\/(\d{1,2})\/(\d{1,2})$/.exec(String(iso).trim());
+  return s?s[1]+'年'+(+s[2])+'月'+(+s[3])+'日':String(iso);}
+function toIso(v){var s=String(v||'').trim();
+  var m=/^(\d{4})[\/-](\d{1,2})[\/-](\d{1,2})/.exec(s);
+  return m?m[1]+'-'+('0'+m[2]).slice(-2)+'-'+('0'+m[3]).slice(-2):'';}
+function addDays(iso,n){var m=/^(\d{4})-(\d{2})-(\d{2})$/.exec(iso||'');if(!m)return '';
+  var d=new Date(+m[1],+m[2]-1,+m[3]);d.setDate(d.getDate()+n);
   return d.getFullYear()+'-'+('0'+(d.getMonth()+1)).slice(-2)+'-'+('0'+d.getDate()).slice(-2)}
-function mins(t){var m=/^(\d{1,2}):(\d{2})$/.exec(t||'');return m?(+m[1])*60+(+m[2]):null}
-function hhmm(t){var m=/^(\d{1,2}):(\d{2})$/.exec(t||'');return m?{h:+m[1],m:+m[2]}:null}
+function mins(t){var m=/^(\d{1,2}):(\d{2})$/.exec(String(t||'').trim());return m?(+m[1])*60+(+m[2]):null}
 function comma(n){if(n===null||n===''||n===undefined)return '';return String(n).replace(/\B(?=(\d{3})+(?!\d))/g,',')}
-
-/* ========== 会社（案件）スロット ========== */
-function newId(){return 'c'+Date.now().toString(36)+Math.random().toString(36).slice(2,6)}
-function defaultPats(){
-  return [
-    {name:'常勤（9:00-18:00／土日祝休）',start:'09:00',end:'18:00',brk:'60',varType:'なし（通常の勤務）',otYes:'有',dpw:'5',hdReg:'毎週土曜日・日曜日、国民の祝日',hdIrr:'',workDays:'毎週月〜金曜日',otW:'',otM:'',otY:'',hdwM:'',hdwY:''},
-    {name:'パート（10:00-15:00／週3日）',start:'10:00',end:'15:00',brk:'0',varType:'なし（通常の勤務）',otYes:'無',dpw:'3',hdReg:'',hdIrr:'シフトによる（週4日）',workDays:'毎週月・水・金曜日',otW:'',otM:'',otY:'',hdwM:'',hdwY:''},
-    {name:'シフト勤務（1か月単位の変形）',start:'08:00',end:'17:00',brk:'60',varType:'1か月単位の変形労働時間制',otYes:'有',dpw:'5',hdReg:'',hdIrr:'月当たり8日（シフト表により指定）',workDays:'シフト表による',otW:'',otM:'',otY:'',hdwM:'',hdwY:''}
-  ];
-}
-function captureDefaults(){ COMPCOLS.forEach(function(c){var e=el('c_'+c[0]);DEF[c[0]]=e?e.value:''}) }
-function coLabel(o){
-  if(!o)return '（未設定）';
-  var l=String(o.label||'').trim();
-  if(l)return l;
-  var n=String((o.comp&&o.comp.compName)||'').trim();
-  return n||'（会社名未入力）';
-}
-function coBar(){
-  var s=el('coSel');if(!s)return;
-  var ids=Object.keys(CO.cos);
-  s.innerHTML=ids.map(function(id){
-    var o=CO.cos[id],n=(o.emps||[]).length;
-    return '<option value="'+id+'">'+esc(coLabel(o))+(n?'（'+n+'名）':'')+'</option>';
-  }).join('');
-  s.value=CO.cur;
-  var t=el('coNote4');
-  if(t)t.innerHTML='<b>'+esc(coLabel(CO.cos[CO.cur]))+'</b> の従業員です。他社に切り替えると一覧も入れ替わります。';
-}
-/* いま画面にある内容を、いまの会社スロットへ書き戻して保存する */
-function save(){
-  COMPCOLS.forEach(function(c){S.comp[c[0]]=gv('c_'+c[0])});
-  var o=CO.cos[CO.cur];
-  if(o){o.comp=S.comp;o.pats=S.pats;o.emps=S.emps;o.updated=today()}
-  try{localStorage.setItem(LS2,JSON.stringify(CO))}catch(e){}
-  coBar();
-}
-function persist(){ try{localStorage.setItem(LS2,JSON.stringify(CO))}catch(e){} }
-/* いまの会社スロットの内容を画面へ流し込む */
-function applyCo(){
-  var o=CO.cos[CO.cur];if(!o)return;
-  S.comp=o.comp||{};
-  S.pats=(o.pats&&o.pats.length)?o.pats:defaultPats();
-  S.emps=o.emps||[];
-  COMPCOLS.forEach(function(c){
-    sv('c_'+c[0], Object.prototype.hasOwnProperty.call(S.comp,c[0]) ? S.comp[c[0]] : DEF[c[0]]);
-  });
-  sv('coName',o.label||'');
-  coBar();
-}
-/* 会社を切り替えたあと、画面の各タブを作り直す共通処理 */
-function coReload(){
-  S.editEmp=-1;
-  applyCo();
-  empNew();patList();patPick();empList();render();
-  persist();
-}
-function load(){
-  var d=null;
-  try{d=JSON.parse(localStorage.getItem(LS2)||'null')}catch(e){}
-  if(d&&d.cos&&Object.keys(d.cos).length){
-    CO=d;
-    if(!CO.cos[CO.cur])CO.cur=Object.keys(CO.cos)[0];
-  } else {
-    /* 旧形式（1社だけ）があれば、1社目として引き継ぐ */
-    var old=null;
-    try{old=JSON.parse(localStorage.getItem(LS)||'null')}catch(e){}
-    var id=newId();
-    CO={cur:id,cos:{}};
-    CO.cos[id]={
-      label:'',
-      comp:(old&&old.comp)||{},
-      pats:(old&&old.pats&&old.pats.length)?old.pats:defaultPats(),
-      emps:(old&&old.emps)||[],
-      updated:today()
-    };
-  }
-  applyCo();
-  if(!gv('e_issue'))sv('e_issue',today());
-}
-function coSwitch(id){
-  if(!CO.cos[id]||id===CO.cur){coBar();return}
-  save();
-  CO.cur=id;
-  coReload();
-  tab(S.curTab);
-  msgTop(coLabel(CO.cos[id])+' に切替');
-}
-function coAdd(){
-  save();
-  var id=newId();
-  CO.cos[id]={label:'',comp:{},pats:defaultPats(),emps:[],updated:today()};
-  CO.cur=id;
-  coReload();
-  tab(1);window.scrollTo(0,0);
-  msg('coMsg','新しい会社を追加しました。事業場名称から入力してください。');
-}
-function coDup(){
-  save();
-  var src=CO.cos[CO.cur],id=newId();
-  CO.cos[id]={
-    label:coLabel(src)+'（コピー）',
-    comp:JSON.parse(JSON.stringify(src.comp||{})),
-    pats:JSON.parse(JSON.stringify(src.pats||defaultPats())),
-    emps:[],updated:today()
-  };
-  CO.cur=id;
-  coReload();
-  tab(1);window.scrollTo(0,0);
-  msg('coMsg','会社設定と勤務パターンを複製しました（従業員は空です）。表示名と事業場名称を直してください。');
-}
-function coDel(){
-  if(Object.keys(CO.cos).length<=1){msg('coMsg','最後の1社は削除できません。消すなら「すべて消す」を使ってください。',true);return}
-  var o=CO.cos[CO.cur];
-  if(!confirm('「'+coLabel(o)+'」の会社設定・勤務パターン・従業員'+(o.emps||[]).length+'件をすべて削除します。元に戻せません。よろしいですか？'))return;
-  delete CO.cos[CO.cur];
-  CO.cur=Object.keys(CO.cos)[0];
-  coReload();
-  msg('coMsg','削除しました。');
-}
-function coRename(){
-  var o=CO.cos[CO.cur];if(!o)return;
-  o.label=gv('coName');
-  save();
-}
-
-/* ========== タブ ========== */
-function tab(n){
-  S.curTab=n;
-  [1,2,3,4].forEach(function(i){show('p'+i,i===n);el('tb'+i).className=(i===n?'on':'')});
-  var b=el('mainBtn');
-  if(n===1){b.textContent='会社設定を保存';b.className='btn'}
-  else if(n===2){b.textContent='勤務パターンを保存';b.className='btn'}
-  else if(n===3){b.textContent=(S.editEmp>=0?'この従業員を更新':'この従業員を一覧に追加');b.className='btn g'}
-  else {b.textContent='一覧を再表示';b.className='btn out'}
-  if(n===2)patList();
-  if(n===3){patPick();render()}
-  if(n===4)empList();
-  window.scrollTo(0,0);
-}
-function mainAct(){
-  if(S.curTab===1){save();msgTop('会社設定を保存しました')}
-  else if(S.curTab===2){patSave()}
-  else if(S.curTab===3){empSave()}
-  else {empList()}
-}
-function msgTop(t){
-  var b=el('mainBtn'),o=b.textContent;
-  b.textContent='✓ '+t;setTimeout(function(){b.textContent=o},1800);
-}
-
-/* ========== 勤務パターン ========== */
-function patList(){
-  var h='';
-  if(!S.pats.length)h='<div class="card"><div class="hint">登録されたパターンはありません。</div></div>';
-  S.pats.forEach(function(p,i){
-    var d=dayHours(p.start,p.end,p.brk);
-    h+='<div class="pat"><div class="ph"><b>'+esc(p.name)+'</b><span>'
-      +'<button class="btn out sm" onclick="patEdit('+i+')">編集</button> '
-      +'<button class="btn red sm" onclick="patDel('+i+')">削除</button></span></div>'
-      +'<div class="hint">'+esc(p.start)+'〜'+esc(p.end)+'／休憩'+esc(p.brk||0)+'分／'
-      +(d!==null?'1日'+fmtH(d)+'・週'+fmtH(d*(+p.dpw||0)):'時刻未設定')
-      +'／所定外'+esc(p.otYes)+'／週'+esc(p.dpw)+'日</div></div>';
-  });
-  el('patList').innerHTML=h;
-}
-function patEdit(i){
-  S.editPat=i;var p=S.pats[i];
-  PATKEYS.forEach(function(k){sv('pt_'+k,p[k])});
-  el('ptSaveBtn').textContent='このパターンを更新';
-  show('ptNewBtn',true);window.scrollTo(0,document.body.scrollHeight);
-}
-function patNew(){
-  S.editPat=-1;
-  PATKEYS.forEach(function(k){sv('pt_'+k,'')});
-  sv('pt_start','09:00');sv('pt_end','18:00');sv('pt_brk','60');
-  sv('pt_varType','なし（通常の勤務）');sv('pt_otYes','有');sv('pt_dpw','5');
-  el('ptSaveBtn').textContent='このパターンを追加';show('ptNewBtn',false);
-}
-function patDel(i){
-  if(!confirm('「'+S.pats[i].name+'」を削除します。よろしいですか？'))return;
-  S.pats.splice(i,1);if(S.editPat===i)patNew();save();patList();patPick();
-}
-function patSave(){
-  var n=gv('pt_name');
-  if(!n){msg('ptMsg','パターン名を入れてください',true);return}
-  var p={};PATKEYS.forEach(function(k){p[k]=gv('pt_'+k)});
-  if(S.editPat>=0){S.pats[S.editPat]=p;msg('ptMsg','更新しました')}
-  else {S.pats.push(p);msg('ptMsg','追加しました')}
-  patNew();save();patList();patPick();
-}
-function patPick(){
-  var s=el('e_patPick');if(!s)return;
-  var cur=s.value;
-  var h='<option value="">（選択してください）</option>';
-  S.pats.forEach(function(p,i){h+='<option value="'+i+'">'+esc(p.name)+'</option>'});
-  s.innerHTML=h;s.value=cur;
-}
-function applyPat(){
-  var i=gv('e_patPick');if(i==='')return;
-  var p=S.pats[+i];if(!p)return;
-  ['start','end','brk','varType','otYes','dpw','hdReg','hdIrr','workDays','otW','otM','otY','hdwM','hdwY']
-    .forEach(function(k){sv('e_'+k,p[k])});
-  if(!gv('e_hdReg')&&!gv('e_hdIrr'))sv('e_hdReg',S.comp.hdReg||'');
-  render();
-}
-
-/* ========== 計算 ========== */
-function dayHours(s,e,b){
-  var a=mins(s),z=mins(e);if(a===null||z===null)return null;
-  var d=z-a;if(d<0)d+=1440;
-  d-=(+b||0);
-  return d>0?d/60:null;
-}
-function fmtH(h){
-  if(h===null)return '';
-  var t=Math.round(h*60),hh=Math.floor(t/60),mm=t%60;
-  return hh+'時間'+(mm?mm+'分':'');
-}
+function dayHours(s,e,b){var a=mins(s),z=mins(e);if(a===null||z===null)return null;
+  var d=z-a;if(d<0)d+=1440;d-=(+b||0);return d>0?d/60:null}
+function fmtH(h){if(h===null)return '';var t=Math.round(h*60),x=Math.floor(t/60),y=t%60;return x+'時間'+(y?y+'分':'')}
 function alvDays(dpw,weekH){
-  if(weekH!==null&&weekH>=30)return {days:ALV_FULL,prop:false};
-  if(dpw>=5)return {days:ALV_FULL,prop:false};
-  var r=ALV_PROP[dpw];
-  if(!r)return {days:null,prop:true};
-  return {days:r,prop:true};
+  if((weekH!==null&&weekH>=30)||dpw>=5)return {days:ALV_FULL,prop:false};
+  var r=ALV_PROP[dpw];return r?{days:r,prop:true}:{days:null,prop:true};
 }
-function hourlyWage(kind,amt,dayH,weekH){
-  if(!amt)return null;
-  if(kind==='時間給')return amt;
-  if(kind==='日給')return dayH?amt/dayH:null;
-  if(kind==='月給')return weekH?amt/(weekH*52/12):null;
-  return null;
-}
-
-/* ========== 従業員タブの描画 ========== */
-function render(){
-  show('w2box', gv('c_w2same')==='別に設ける');
-
-  var isTerm = gv('e_termHas')==='期間の定めあり';
-  show('termBox', isTerm);
-  var isPart = gv('e_form').indexOf('短時間')===0;
-  show('otLimBox', isPart);
-  show('workDaysBox', isPart);
-
-  /* 無期転換日 */
-  var mk=el('mukiCalc');
-  if(mk){
-    if(isTerm && gv('e_muki')==='該当する' && gv('e_termTo')){
-      mk.innerHTML='<div class="calc"><div>無期労働契約での雇用に転換できる日（契約末日の翌日）</div>'
-        +'<div class="big">'+esc(jpDate(addDays(gv('e_termTo'),1)))+'</div>'
-        +'<div class="hint" style="color:#1a5e3c">労働契約法18条。この契約期間中に申込みをすることで転換されます。</div></div>';
-    } else mk.innerHTML='';
-  }
-
-  var dayH=dayHours(gv('e_start'),gv('e_end'),gv('e_brk'));
-  var dpw=+gv('e_dpw')||0;
-  var weekH=(dayH!==null&&dpw)?dayH*dpw:null;
-
-  /* 年休 */
-  var a=el('alvCalc');
-  if(a){
-    var r=alvDays(dpw,weekH);
-    if(r.days){
-      if(!alvTouched || !gv('e_alv'))sv('e_alv',r.days[0]);
-      var lbl=['6か月','1年6か月','2年6か月','3年6か月','4年6か月','5年6か月','6年6か月以上'];
-      var tb=r.days.map(function(d,i){return lbl[i]+'：'+d+'日'}).join('／');
-      a.innerHTML='<div class="calc"><div>1日の所定労働時間 <b>'+fmtH(dayH)+'</b>　週所定労働時間 <b>'+fmtH(weekH)+'</b></div>'
-        +'<div>6か月継続勤務した場合の年次有給休暇 <span class="big">'+r.days[0]+'日</span>'
-        +(r.prop?'<span class="pill w">比例付与</span>':'<span class="pill n">通常付与</span>')+'</div>'
-        +'<div class="hint" style="color:#1a5e3c">'+tb+'（出勤率8割以上が条件）</div></div>';
-    } else a.innerHTML='';
-  }
-
-  /* 賃金 */
-  var w=el('wageCalc');
-  if(w){
-    var amt=num(gv('e_wageAmt')),kind=gv('e_wageKind');
-    var hw=hourlyWage(kind,amt,dayH,weekH);
-    if(hw!==null){
-      var mw=num(S.comp.minWage||gv('c_minWage'));
-      var ok=(mw===null)?null:(hw>=mw);
-      w.innerHTML='<div class="calc"><div>時間給換算（基本賃金のみ） <span class="big">'+Math.round(hw*10)/10+' 円</span></div>'
-        +(mw===null?'<div class="hint" style="color:#1a5e3c">①会社設定に最低賃金を入れると判定します。</div>'
-          :'<div>適用最低賃金 '+mw+' 円 → '+(ok?'<b style="color:#1a5e3c">クリア</b>':'<b style="color:#c0392b">下回っています</b>')+'</div>')
-        +'<div class="hint" style="color:#1a5e3c">※最低賃金の比較では通勤手当・精皆勤手当・家族手当・時間外割増・賞与等は算入しません。目安としてご確認ください。</div></div>';
-    } else w.innerHTML='';
-  }
-
-  /* 社保・雇用保険の目安 */
-  var ic=el('insCalc');
-  if(ic){
-    var t=[];
-    if(weekH!==null){
-      if(weekH>=30)t.push('週所定労働時間30時間以上 → <b>社会保険は加入</b>（4分の3基準）');
-      else if(weekH>=20){
-        var amt2=num(gv('e_wageAmt')),mWage=(gv('e_wageKind')==='月給')?amt2:null;
-        var big=(S.comp.isLarge||gv('c_isLarge'))==='はい';
-        t.push('週所定労働時間20時間以上30時間未満 → 特定適用事業所（51人以上）で月額賃金8.8万円以上・学生でない場合は社会保険の加入対象'
-          +(big?'（この事業場は<b>特定適用事業所</b>）':'（この事業場は特定適用事業所ではない設定）')
-          +(mWage!==null?'／月額基本賃金 '+comma(mWage)+'円':''));
-      } else t.push('週所定労働時間20時間未満 → 社会保険は原則対象外');
-      t.push(weekH>=20?'週20時間以上かつ31日以上の雇用見込み → <b>雇用保険は加入</b>':'週20時間未満 → 雇用保険は原則対象外');
-    }
-    ic.innerHTML=t.length?'<div class="info"><b>加入の目安（自動判定・参考）</b><br>'+t.join('<br>')+'<br><span class="hint" style="color:#0a5b62">実際の適用は要件の詳細で変わります。年金事務所・ハローワークでご確認ください。</span></div>':'';
-  }
-
-  checks(dayH,weekH,dpw);
-}
-
-/* ========== 警告チェック ========== */
-function checks(dayH,weekH,dpw){
-  var c=el('checkBox');if(!c)return;
-  var w=[];
-  var varT=gv('e_varType'), flexi=(varT!=='なし（通常の勤務）'&&varT!=='交替制');
-
-  if(dayH!==null&&dayH>8&&!flexi)
-    w.push('1日の所定労働時間が <b>'+fmtH(dayH)+'</b> で8時間を超えています（労基法32条）。変形労働時間制等の適用がなければ法定労働時間を超えます。');
-  if(weekH!==null&&weekH>40&&!flexi)
-    w.push('週の所定労働時間が <b>'+fmtH(weekH)+'</b> で40時間を超えています（労基法32条）。');
-
-  var b=+gv('e_brk')||0, work=dayH!==null?dayH+b/60:null;
-  if(work!==null){
-    if(work>8&&b<60)w.push('拘束'+fmtH(work)+'（実働'+fmtH(dayH)+'）で休憩が <b>'+b+'分</b>。労働時間が8時間を超える場合は<b>60分以上</b>必要です（労基法34条）。');
-    else if(work>6&&b<45)w.push('拘束'+fmtH(work)+'（実働'+fmtH(dayH)+'）で休憩が <b>'+b+'分</b>。労働時間が6時間を超える場合は<b>45分以上</b>必要です（労基法34条）。');
-  }
-
-  var lim={otLegal:[25,'法定超（月60時間以内）'],otOver60:[50,'法定超（月60時間超）'],hdLegal:[35,'法定休日'],night:[25,'深夜']};
-  Object.keys(lim).forEach(function(k){
-    var v=num(S.comp[k]||gv('c_'+k));
-    if(v!==null&&v<lim[k][0])w.push('割増賃金率「'+lim[k][1]+'」が <b>'+v+'%</b>。法定下限は '+lim[k][0]+'% です（労基法37条）。');
+/* フォームの手当欄は「通勤手当8000円、役職手当20000円」のような自由記述。
+   様式は「名称／額／計算方法」の欄に分かれているので、ここで分解する */
+function parseAllow(s){
+  var t=String(s||'').trim();
+  if(!t)return ['','','',''];
+  var parts=t.split(/[、,，\n]+/).map(function(x){return x.trim()}).filter(Boolean);
+  var out=parts.slice(0,4).map(function(p){
+    var m=/^(.*?)[\s:：]*([0-9][0-9,]*)\s*円?$/.exec(p);
+    if(m&&m[1].trim())return m[1].trim()+' / '+m[2].replace(/,/g,'')+' / ';
+    return p+' /  / ';
   });
-
-  if(gv('e_otYes')==='無'&&(gv('e_otW')||gv('e_otM')||gv('e_otY')))
-    w.push('所定時間外労働が「無」なのに<b>所定外労働の上限</b>が入力されています。どちらかに合わせてください。');
-
-  if(gv('e_otYes')==='有'&&(S.comp.has36||gv('c_has36'))==='いいえ')
-    w.push('所定時間外労働「有」ですが、<b>36協定が未届出</b>の設定です。法定労働時間を超える時間外労働には36協定の締結・届出が必要です（労基法36条）。');
-
-  var ret=(S.comp.retire||gv('c_retire')||'');
-  var rm=/(\d{2})\s*歳/.exec(ret);
-  if(rm&&+rm[1]<60)w.push('定年が <b>'+rm[1]+'歳</b>。定年は60歳を下回れません（高年齢者雇用安定法8条）。');
-
-  var mw=num(S.comp.minWage||gv('c_minWage'));
-  var hw=hourlyWage(gv('e_wageKind'),num(gv('e_wageAmt')),dayH,weekH);
-  if(mw!==null&&hw!==null&&hw<mw)
-    w.push('基本賃金の時間給換算が <b>'+(Math.round(hw*10)/10)+'円</b> で、適用最低賃金 '+mw+'円 を下回っています（最低賃金法）。');
-
-  if(gv('e_termHas')==='期間の定めあり'&&!gv('e_limitTxt'))
-    w.push('有期契約ですが<b>更新上限</b>が空欄です。2024年4月から、更新上限の有無と内容は明示が必要です（無い場合は「無」と記載）。');
-  if(!gv('e_place2'))w.push('<b>就業の場所（変更の範囲）</b>が空欄です。2024年4月から全労働者について明示が必要です。');
-  if(!gv('e_job2'))w.push('<b>従事すべき業務の内容（変更の範囲）</b>が空欄です。2024年4月から全労働者について明示が必要です。');
-  if(!(S.comp.dismissal||gv('c_dismissal')))w.push('<b>解雇の事由及び手続</b>（①会社設定）が空欄です。書面での明示が義務付けられています。');
-  if(!(S.comp.w1dept||gv('c_w1dept')))w.push('<b>待遇の相違の説明を求める窓口</b>（①会社設定）が空欄です。令和8年10月1日からの追加明示事項です。');
-
-  c.innerHTML = w.length
-    ? '<div class="alert"><b>確認してください（'+w.length+'件）</b><ul><li>'+w.join('</li><li>')+'</li></ul></div>'
-    : '<div class="calc"><b>自動チェックで引っかかる点はありません。</b><div class="hint" style="color:#1a5e3c">チェックは主要な法定事項の機械的な確認です。最終確認は事業者ご自身で行ってください。</div></div>';
+  while(out.length<4)out.push('');
+  return out;
 }
 
-/* ========== 従業員の保存・編集 ========== */
-function kubunChange(){
-  var k=gv('e_kubun');
-  if(k==='パート・アルバイト'){sv('e_form','短時間労働者用（常用、有期雇用型）')}
-  else {sv('e_form','一般労働者用（常用、有期雇用型）')}
-  if(k==='契約社員（有期）'||k==='パート・アルバイト'){ if(gv('e_termHas')==='期間の定めなし'&&k==='契約社員（有期）')sv('e_termHas','期間の定めあり') }
-  render();
+/* ===== 読み込み ===== */
+function clearAll(){
+  el('src').value='';el('msg').innerHTML='';el('list').innerHTML='';
+  ROWS=[];show('resultCard',false);show('printCard',false);
 }
-function useDefPlace(){
-  sv('e_place1',S.comp.placeDef||gv('c_placeDef'));
-  sv('e_place2',S.comp.place2Def||gv('c_place2Def'));
-  render();
-}
-function empDefaults(){
-  sv('e_issue',today());
-  sv('e_place1',S.comp.placeDef||'');sv('e_place2',S.comp.place2Def||'');
-  sv('e_raise',S.comp.raiseDef||'');sv('e_bonus',S.comp.bonusDef||'');sv('e_sever',S.comp.severDef||'');
-  sv('e_empIns',S.comp.empInsDef||'有');
-  sv('e_hdReg',S.comp.hdReg||'');sv('e_hdIrr',S.comp.hdIrr||'');
-}
-function readEmp(){
-  var e={};
-  EMPCOLS.forEach(function(c){ if(c[0]!=='renewCriteria') e[c[0]]=gv('e_'+c[0]) });
-  var r=[];
-  RC.forEach(function(t,i){ if(el('e_rc'+(i+1)).checked)r.push(t) });
-  var o=gv('e_rcOther');if(o)r.push(o);
-  e.renewCriteria=r.join('・');
-  var i=gv('e_patPick');e.patName=(i!==''&&S.pats[+i])?S.pats[+i].name:(e.patName||'');
-  return e;
-}
-function writeEmp(e){
-  alvTouched=true;  /* 保存済みの年休日数を自動計算で上書きしない */
-  EMPCOLS.forEach(function(c){ if(c[0]!=='renewCriteria') sv('e_'+c[0],e[c[0]]) });
-  var rc=String(e.renewCriteria||'').split('・');
-  RC.forEach(function(t,i){ el('e_rc'+(i+1)).checked = rc.indexOf(t)>=0 });
-  sv('e_rcOther', rc.filter(function(x){return x&&RC.indexOf(x)<0}).join('・'));
-  var pi='';S.pats.forEach(function(p,i){if(p.name===e.patName)pi=String(i)});
-  sv('e_patPick',pi);
-  render();
-}
-function empSave(){
-  var e=readEmp();
-  if(!e.name){alert('氏名を入れてください');return}
-  if(S.editEmp>=0){S.emps[S.editEmp]=e;S.editEmp=-1;msgTop('更新しました')}
-  else {S.emps.push(e);msgTop('一覧に追加しました')}
-  save();empNew();empList();tab(4);
-}
-function empNew(){
-  S.editEmp=-1;alvTouched=false;
-  EMPCOLS.forEach(function(c){sv('e_'+c[0],'')});
-  RC.forEach(function(t,i){el('e_rc'+(i+1)).checked=false});
-  sv('e_rcOther','');sv('e_patPick','');
-  sv('e_kubun','正社員');sv('e_form','一般労働者用（常用、有期雇用型）');
-  sv('e_termHas','期間の定めなし');sv('e_renewKind','更新する場合があり得る');
-  sv('e_muki','該当しない');sv('e_wageKind','月給');sv('e_varType','なし（通常の勤務）');
-  sv('e_otYes','有');sv('e_dpw','5');
-  empDefaults();
-  el('e_mode').innerHTML='新しい従業員を入力します。';
-  render();
-}
-function empEdit(i){
-  S.editEmp=i;writeEmp(S.emps[i]);
-  el('e_mode').innerHTML='<b>'+esc(S.emps[i].name)+'</b> さんの内容を編集しています。';
-  tab(3);
-}
-function empCopy(i){
-  var e=JSON.parse(JSON.stringify(S.emps[i]));
-  e.name='';S.editEmp=-1;writeEmp(e);
-  el('e_mode').innerHTML='<b>'+esc(S.emps[i].name)+'</b> さんの内容をコピーしました。氏名など違うところだけ直してください。';
-  tab(3);
-}
-function empDel(i){
-  if(!confirm(S.emps[i].name+' さんを一覧から削除します。よろしいですか？'))return;
-  S.emps.splice(i,1);if(S.editEmp===i)S.editEmp=-1;save();empList();
-}
-function empList(){
-  var h='';
-  if(!S.emps.length){
-    el('empList').innerHTML='<div class="hint">まだ登録がありません。「③ 従業員入力」から追加してください。</div>';return;
+function run(){
+  el('msg').innerHTML='';show('resultCard',false);show('printCard',false);ROWS=[];
+  var raw=gv('src');
+  if(!raw.trim()){fail('何も貼り付けられていません。',['スプレッドシートで見出し行を含めて選択し、コピーして貼り付けてください。']);return}
+
+  var lines=raw.replace(/\r/g,'').split('\n').filter(function(x){return x.trim()!==''});
+  if(lines.length<2){
+    fail('行が足りません。',['見出し行（1行目）とデータ行の両方が必要です。','いま貼られているのは '+lines.length+' 行です。']);return;
   }
-  h='<table class="list"><tr><th style="width:34px"></th><th>氏名</th><th>区分</th><th>期間</th><th>基本賃金</th><th style="width:150px"></th></tr>';
-  S.emps.forEach(function(e,i){
-    h+='<tr><td class="c"><input type="checkbox" class="esel" data-i="'+i+'" checked style="width:20px;height:20px"></td>'
-      +'<td><b>'+esc(e.name)+'</b><div class="hint">'+esc(String(e.form||'').replace(/（.*/,''))+'</div></td>'
-      +'<td>'+esc(e.kubun)+'</td>'
-      +'<td>'+(e.termHas==='期間の定めあり'?esc(jpDate(e.termFrom))+'〜<br>'+esc(jpDate(e.termTo)):'定めなし')+'</td>'
-      +'<td>'+esc(e.wageKind)+' '+comma(e.wageAmt)+'円</td>'
-      +'<td class="c"><button class="btn out sm" onclick="empEdit('+i+')">編集</button> '
-      +'<button class="btn out sm" onclick="empCopy('+i+')">複製</button> '
-      +'<button class="btn out sm" onclick="printOne('+i+')">通知書</button> '
-      +'<button class="btn red sm" onclick="empDel('+i+')">削除</button></td></tr>';
-  });
-  h+='</table>';
-  el('empList').innerHTML=h;
-}
-function selAll(b){
-  var n=document.querySelectorAll('.esel');
-  for(var i=0;i<n.length;i++)n[i].checked=b;
-}
+  var grid=lines.map(function(x){return x.split('\t')});
+  var head=grid[0].map(function(x){return String(x).trim()});
 
-/* ========== TSV ========== */
-function tsvCell(v){var s=String(v===undefined||v===null?'':v);return s.replace(/\t/g,' ').replace(/\r?\n/g,' ')}
-function buildTsv(kind){
-  if(kind==='comp'){
-    save();
-    return COMPCOLS.map(function(c){return c[1]}).join('\t')+'\n'
-         + COMPCOLS.map(function(c){return tsvCell(S.comp[c[0]])}).join('\t');
+  /* 見出し行かどうかを厳密に見る。推測で位置合わせはしない */
+  var miss=MUST.filter(function(c){return head.indexOf(c)<0});
+  if(miss.length){
+    fail('1行目が見出し行として認識できません。',[
+      '見つからない列：<b>'+miss.join('</b>、<b>')+'</b>',
+      'スプレッドシートの<b>1行目（見出し）から</b>選択してコピーし直してください。',
+      'データ行だけを貼ると、どの列が何なのか判定できないためエラーにしています。'
+    ]);return;
   }
-  var out=[EMPCOLS.map(function(c){return c[1]}).join('\t')];
-  S.emps.forEach(function(e){ out.push(EMPCOLS.map(function(c){return tsvCell(e[c[0]])}).join('\t')) });
-  return out.join('\n');
-}
-function showTsv(kind){
-  var id=(kind==='comp'?'tsvComp':'tsvEmp');
-  el(id).value=buildTsv(kind);show(id,true);
-}
-/* 古い方式でのコピー。LINE等のアプリ内ブラウザでは新しいClipboard APIが
-   権限で弾かれることがあるため、必ずこちらを保険に用意しておく */
-function copyLegacy(id){
-  var a=el(id);if(!a)return false;
-  try{
-    a.removeAttribute('readonly');
-    a.focus();
-    a.setSelectionRange(0,a.value.length);   /* iOSは select() だけだと効かないことがある */
-    var ok=document.execCommand('copy');
-    a.setAttribute('readonly','readonly');
-    window.getSelection().removeAllRanges();
-    return !!ok;
-  }catch(e){
-    try{a.setAttribute('readonly','readonly')}catch(e2){}
-    return false;
-  }
-}
-function copyTsv(kind){
-  var t=buildTsv(kind),mid=(kind==='comp'?'tsvMsg2':'tsvMsg1');
-  if(kind==='emp'&&!S.emps.length){msg(mid,'従業員が登録されていません',true);return}
-  showTsv(kind);
-  var id=(kind==='comp'?'tsvComp':'tsvEmp');
-  var done=function(){msg(mid,'コピーしました。スプレッドシートのA1に貼り付けてください')};
-  var fail=function(){msg(mid,'自動コピーできませんでした。下の黒い枠を長押し→全選択→コピーしてください',true)};
-  if(navigator.clipboard&&navigator.clipboard.writeText){
-    navigator.clipboard.writeText(t).then(done,function(){ if(!copyLegacy(id))fail() });
-  } else {
-    if(!copyLegacy(id))fail();
-  }
-}
-function importTsv(kind){
-  var raw=gv(kind==='comp'?'tsvCompIn':'tsvEmpIn'),mid=(kind==='comp'?'impMsg2':'impMsg1');
-  if(!raw){msg(mid,'貼り付けてから押してください',true);return}
-  var rows=raw.replace(/\r/g,'').split('\n').filter(function(r){return r.trim()!==''}).map(function(r){return r.split('\t')});
-  var cols=(kind==='comp'?COMPCOLS:EMPCOLS);
-  var head=rows[0].map(function(x){return x.trim()});
-  var mapIdx=[];
-  var looksHeader = cols.some(function(c){return head.indexOf(c[1])>=0});
-  if(looksHeader){
-    cols.forEach(function(c){mapIdx.push(head.indexOf(c[1]))});
-    rows.shift();
-  } else {
-    cols.forEach(function(c,i){mapIdx.push(i)});
-  }
-  if(!rows.length){msg(mid,'データ行が見つかりません',true);return}
-  function pick(r,i){var k=mapIdx[i];return (k>=0&&r[k]!==undefined)?String(r[k]).trim():''}
-  if(kind==='comp'){
-    var o={};cols.forEach(function(c,i){o[c[0]]=pick(rows[0],i)});
-    S.comp=o;
-    COMPCOLS.forEach(function(c){sv('c_'+c[0],S.comp[c[0]])});
-    save();msg(mid,'会社設定を取り込みました');
-  } else {
-    var list=[];
-    rows.forEach(function(r){
-      var o={};cols.forEach(function(c,i){o[c[0]]=pick(r,i)});
-      if(o.name)list.push(o);
-    });
-    if(!list.length){msg(mid,'氏名のある行が見つかりません',true);return}
-    if(!confirm('現在の'+S.emps.length+'件を、取り込む'+list.length+'件に置き換えます。よろしいですか？'))return;
-    S.emps=list;save();empList();msg(mid,list.length+'件を取り込みました');
-  }
-}
-/* ========== 事業者フォームの回答を取り込む ==========
-   フォームは法定の最低限しか聞かない。ここで、聞いていない項目を
-   「法定どおり」の内容で補ってから、通常の会社スロットに流し込む。 */
-var DISMISS_DEFAULT='次のいずれかに該当する場合は解雇することがある。①勤務成績又は業務能率が著しく不良で、向上の見込みがないと認められるとき　②精神又は身体の障害により業務に耐えられないと認められるとき　③事業の運営上やむを得ない事情により、事業の縮小又は部門の閉鎖等を行う必要が生じたとき　④その他前各号に準ずるやむを得ない事由があるとき。解雇する場合は、少なくとも30日前に予告するか、平均賃金の30日分以上の解雇予告手当を支払う。';
+  var notFound=COLS.filter(function(c){return head.indexOf(c)<0});
+  grid.shift();
 
-function importForm(){
-  var raw=gv('formIn');
-  if(!raw){msg('formMsg','貼り付けてから押してください',true);return}
-  var lines=raw.replace(/\r/g,'').split('\n').filter(function(r){return r.trim()!==''});
-  if(lines.length<2){msg('formMsg','見出し行とデータ行が必要です',true);return}
-  var rows=lines.map(function(r){return r.split('\t')});
-  var head=rows[0].map(function(x){return x.trim()});
-  if(head.indexOf('事業場名称')<0||head.indexOf('氏名')<0){
-    msg('formMsg','フォームの見出し行が見つかりません（「事業場名称」「氏名」の列が必要）',true);return;
-  }
-  rows.shift();
   var F=function(r,name){var i=head.indexOf(name);return (i>=0&&r[i]!==undefined)?String(r[i]).trim():''};
 
   /* 会社ごとにまとめる */
   var groups={},order=[];
-  rows.forEach(function(r){
-    var key=F(r,'事業場名称');
-    if(!key||!F(r,'氏名'))return;
-    if(!groups[key]){groups[key]=[];order.push(key)}
-    groups[key].push(r);
+  grid.forEach(function(r){
+    var k=F(r,'事業場名称');
+    if(!k||!F(r,'氏名'))return;
+    if(!groups[k]){groups[k]=[];order.push(k)}
+    groups[k].push(r);
   });
-  if(!order.length){msg('formMsg','取り込める行がありません',true);return}
-  if(!confirm(order.length+'社・'+rows.length+'名を取り込みます。会社ごとに新しいスロットを作ります。よろしいですか？'))return;
-
-  save();
-  /* 何も入っていない初期スロットは、取り込み後に片付ける */
-  var emptyIds=Object.keys(CO.cos).filter(function(id){
-    var o=CO.cos[id];
-    return !((o.comp&&o.comp.compName)||'').trim() && !(o.emps||[]).length;
-  });
-  /* 同じ事業場名が既にあるとき、置き換えるか別に足すかを1回だけ聞く */
-  var findSlot=function(name){
-    var hit='';
-    Object.keys(CO.cos).forEach(function(id){
-      if(emptyIds.indexOf(id)<0 && ((CO.cos[id].comp&&CO.cos[id].comp.compName)||'')===name)hit=id;
-    });
-    return hit;
-  };
-  var dup=order.filter(function(k){return findSlot(k)});
-  var replace=false;
-  if(dup.length){
-    replace=confirm('次の会社はすでに登録されています。\n\n　'+dup.join('\n　')
-      +'\n\n[OK]＝最新の内容で置き換える（登録済みの内容は消えます）\n[キャンセル]＝別の会社として追加する');
+  if(!order.length){
+    fail('取り込める行がありませんでした。',['「事業場名称」と「氏名」の両方が入っている行が見つかりません。']);return;
   }
-  var added=0,lastId='';
-  order.forEach(function(key){
-    var rs=groups[key], r0=rs[0];
-    var tel=F(r0,'電話番号'), rep=F(r0,'代表者職氏名');
-    var placeScope=F(r0,'就業場所の変更の範囲');
-    var jobScope=F(r0,'業務の変更の範囲');
-    var holiday=F(r0,'休日');
-    var isShift=/シフト/.test(holiday);
-    var ret=F(r0,'定年'), ins=F(r0,'社会保険');
-    var kosei=(ins.indexOf('すべて')>=0)?'有':'無';
-    var koyo=(ins.indexOf('加入していない')>=0)?'無':'有';
 
-    var comp={};
-    COMPCOLS.forEach(function(c){comp[c[0]]=DEF[c[0]]||''});   /* まず法定下限などの初期値 */
-    comp.compName=key;
-    comp.compAddr=F(r0,'事業場所在地');
-    comp.compRep=rep;
-    comp.rulesHas=(F(r0,'就業規則')==='ある')?'有':'無';
-    comp.rulesPlace=F(r0,'就業規則の場所');
-    comp.payCut=F(r0,'賃金締切日');
-    comp.payDay=F(r0,'賃金支払日');
-    comp.payMethod='本人名義の金融機関口座へ振込';
-    comp.payDeduct='無';
-    comp.hdReg=isShift?'':holiday;
-    comp.hdIrr=isShift?holiday:'';
-    comp.retire=/定めなし/.test(ret)?'無':('有（'+((/60歳/.test(ret))?'60':'65')+'歳）');
-    comp.contEmp=/継続雇用/.test(ret)?('有（'+((/70歳まで/.test(ret))?'70':'65')+'歳まで）'):'無';
-    comp.founder='無';
-    comp.quitDays='14';
-    comp.dismissal=DISMISS_DEFAULT;
-    comp.siKosei=kosei; comp.siKenpo=kosei; comp.siOther='';
-    comp.empInsDef=koyo;
-    comp.chutaikyo='加入していない';
-    comp.pension='無';
-    /* 相談窓口＝代表者。パート・有期には明示義務がある */
-    comp.w1dept=key; comp.w1name=rep; comp.w1tel=tel;
-    comp.w2same='同じ（同上と記載）';
-    comp.placeDef=key+'（'+comp.compAddr+'）';
-    comp.place2Def=/転勤なし/.test(placeScope)?'変更なし（上記の事業場のみ）':'会社の定める事業所';
-    comp.raiseDef=''; comp.bonusDef=''; comp.severDef='';
-    comp.rulesName='';
+  order.forEach(function(key){ ROWS=ROWS.concat(buildCompany(key,groups[key],F)) });
 
-    var jobDef=/限る/.test(jobScope)?'変更なし（上記の業務に限る）':'会社の定める業務全般';
-    var ptRaise=F(r0,'パート昇給'), ptBonus=F(r0,'パート賞与'), ptSever=F(r0,'パート退職金');
+  draw(notFound);
+}
+function fail(title,items){
+  el('msg').innerHTML='<div class="err"><b>'+esc(title)+'</b><ul><li>'+items.join('</li><li>')+'</li></ul></div>';
+}
 
-    /* 勤務パターン（この会社ぶんだけ） */
-    var pats=[],pidx={};
-    rs.forEach(function(r){
-      var pn=F(r,'勤務パターン名')||'勤務パターン';
-      if(pidx[pn]!==undefined)return;
-      pidx[pn]=pats.length;
-      pats.push({name:pn,start:F(r,'始業'),end:F(r,'終業'),brk:F(r,'休憩分'),
-        varType:(F(r,'勤務時間の形').indexOf('シフト')>=0)?'1か月単位の変形労働時間制':'なし（通常の勤務）',
-        otYes:F(r,'残業')||'有',dpw:F(r,'週勤務日数')||'5',
-        hdReg:comp.hdReg,hdIrr:comp.hdIrr,workDays:'',otW:'',otM:'',otY:'',hdwM:'',hdwY:''});
-    });
-    if(!pats.length)pats=defaultPats();
+/* 1社ぶんを組み立てる */
+function buildCompany(key,rs,F){
+  var r0=rs[0];
+  var addr=F(r0,'事業場所在地'), rep=F(r0,'代表者職氏名'), tel=F(r0,'電話番号');
+  var holiday=F(r0,'休日'), isShift=/シフト/.test(holiday);
+  var ret=F(r0,'定年'), ins=F(r0,'社会保険');
+  var kosei=(ins.indexOf('すべて')>=0)?'有':'無';
+  var koyo=(ins.indexOf('加入していない')>=0)?'無':'有';
 
-    /* 「短時間労働者」＝同じ事業主の通常の労働者より週所定労働時間が短い人
-       （パート・有期法2条1項）。この会社で最も長い週所定を基準にする。
-       フルタイムの有期契約は短時間労働者ではないので、一般労働者用の様式になる。 */
-    var weekOf=function(p){
-      var h=dayHours(p.start,p.end,p.brk),d=+p.dpw||0;
-      return (h!==null&&d)?h*d:0;
-    };
-    var fullWeek=Math.max.apply(null,pats.map(weekOf).concat([0]));
+  var comp={};
+  comp.compName=key; comp.compAddr=addr; comp.compRep=rep;
+  comp.rulesHas=(F(r0,'就業規則')==='ある')?'有':'無';
+  comp.rulesPlace=F(r0,'就業規則の場所');
+  comp.payCut=F(r0,'賃金締切日'); comp.payDay=F(r0,'賃金支払日');
+  comp.payMethod='本人名義の金融機関口座へ振込'; comp.payDeduct='無';
+  comp.otLegal='25'; comp.otOver60='50'; comp.otSched='25';
+  comp.hdLegal='35'; comp.hdNon='25'; comp.night='25';
+  comp.hdReg=isShift?'':holiday; comp.hdIrr=isShift?holiday:'';
+  comp.avEarly='無'; comp.avHour='無'; comp.avAlt='無'; comp.vacPaid=''; comp.vacUnpaid='';
+  comp.retire=/定めなし/.test(ret)?'無':('有（'+(/60歳/.test(ret)?'60':'65')+'歳）');
+  comp.contEmp=/継続雇用/.test(ret)?('有（'+(/70歳まで/.test(ret)?'70':'65')+'歳まで）'):'無';
+  comp.founder='無'; comp.quitDays='14'; comp.dismissal=DISMISS_DEFAULT;
+  comp.siKosei=kosei; comp.siKenpo=kosei; comp.siOther=''; comp.empInsDef=koyo;
+  comp.chutaikyo='加入していない'; comp.pension='無';
+  comp.w1dept=key; comp.w1name=rep; comp.w1tel=tel;
+  comp.w2same='同じ（同上と記載）';
+  comp.artTime=''; comp.artHoliday=''; comp.artVac=''; comp.artWage=''; comp.artRetire='';
+  comp.rulesName='';
 
-    /* 従業員 */
-    var emps=rs.map(function(r){
-      var kubun=F(r,'雇用の形');
-      var yuki=/期間の定めあり/.test(kubun);
-      var pn=F(r,'勤務パターン名')||'勤務パターン';
-      var p=pats[pidx[pn]!==undefined?pidx[pn]:0];
-      var dayH=dayHours(p.start,p.end,p.brk), dpw=+p.dpw||0;
-      var weekH=(dayH!==null&&dpw)?dayH*dpw:null;
-      var a=alvDays(dpw,weekH);
-      var wk=F(r,'給与の種類'); wk=(wk==='時給')?'時間給':wk;
-      var isShort=(weekH!==null&&fullWeek>0&&weekH<fullWeek);   /* 短時間労働者か */
-      var needsPartInfo=isShort||yuki;                          /* パート・有期法6条の追加明示が要るか */
-      var e={};
-      EMPCOLS.forEach(function(c){e[c[0]]=''});
-      e.name=F(r,'氏名');
-      e.issue=today();
-      e.kubun=yuki?'契約社員（有期）':(isShort?'パート・アルバイト':'正社員');
-      e.form=isShort?'短時間労働者用（常用、有期雇用型）':'一般労働者用（常用、有期雇用型）';
-      e.termHas=yuki?'期間の定めあり':'期間の定めなし';
-      e.termFrom=F(r,'契約開始日'); e.termTo=F(r,'契約終了日');
-      if(yuki){
-        e.renewKind='更新する場合があり得る';
-        e.renewCriteria='契約期間満了時の業務量・勤務成績、態度・能力・会社の経営状況・従事している業務の進捗状況';
-        e.limitTxt='無';
-      }
-      e.muki='該当しない';
-      e.place1=comp.placeDef; e.place2=comp.place2Def;
-      e.job1=F(r,'仕事の内容'); e.job2=jobDef;
-      e.patName=p.name; e.start=p.start; e.end=p.end; e.brk=p.brk;
-      e.varType=p.varType; e.otYes=p.otYes;
-      e.hdReg=comp.hdReg; e.hdIrr=comp.hdIrr; e.dpw=p.dpw;
-      e.alv=a.days?String(a.days[0]):'';
-      e.wageKind=wk||'月給'; e.wageAmt=F(r,'金額');
-      e.al1=F(r,'手当');
-      /* 昇給は全員が明示事項（労基則5条1項3号）。短時間・有期は3つとも明示義務（パート・有期法6条） */
-      e.raise=(ptRaise==='あり')?'有':'無';
-      e.bonus=(ptBonus==='あり')?'有':'無';
-      e.sever=(ptSever==='あり')?'有':'無';
-      if(!needsPartInfo&&!ptRaise){e.raise='';e.bonus='';e.sever=''}
-      e.empIns=(weekH!==null&&weekH<20)?'無':comp.empInsDef;
-      e.other='';
-      return e;
-    });
+  var placeScope=F(r0,'就業場所の変更の範囲');
+  var jobScope=F(r0,'業務の変更の範囲');
+  var place1=key+(addr?'（'+addr+'）':'');
+  var place2=/転勤なし/.test(placeScope)?'変更なし（上記の事業場のみ）':'会社の定める事業所';
+  var job2=/限る/.test(jobScope)?'変更なし（上記の業務に限る）':'会社の定める業務全般';
+  var ptR=F(r0,'パート昇給'), ptB=F(r0,'パート賞与'), ptS=F(r0,'パート退職金');
 
-    var id=(replace&&findSlot(key)) || newId();
-    CO.cos[id]={label:(CO.cos[id]&&CO.cos[id].label)||'',comp:comp,pats:pats,emps:emps,updated:today()};
-    lastId=id; added++;
+  /* 勤務パターン */
+  var pats={};
+  rs.forEach(function(r){
+    var pn=F(r,'勤務パターン名')||'勤務パターン';
+    if(pats[pn])return;
+    pats[pn]={name:pn,start:F(r,'始業'),end:F(r,'終業'),brk:F(r,'休憩分'),
+      dpw:F(r,'週勤務日数')||'5',otYes:F(r,'残業')||'有',
+      varType:(F(r,'勤務時間の形').indexOf('シフト')>=0)?'1か月単位の変形労働時間制':'なし（通常の勤務）'};
+  });
+  /* 「通常の労働者」＝この事業場でいちばん週所定が長い勤務。それより短い人が短時間労働者
+     （パートタイム・有期雇用労働法2条1項）。フルタイムの有期契約は短時間労働者ではない */
+  var fullWeek=0;
+  Object.keys(pats).forEach(function(k2){
+    var p=pats[k2],h=dayHours(p.start,p.end,p.brk),d=+p.dpw||0;
+    if(h!==null&&d&&h*d>fullWeek)fullWeek=h*d;
   });
 
-  emptyIds.forEach(function(id){
-    if(Object.keys(CO.cos).length>1)delete CO.cos[id];
+  return rs.map(function(r){
+    var pn=F(r,'勤務パターン名')||'勤務パターン';
+    var p=pats[pn];
+    var dayH=dayHours(p.start,p.end,p.brk), dpw=+p.dpw||0;
+    var weekH=(dayH!==null&&dpw)?dayH*dpw:null;
+    var kubun=F(r,'雇用の形');
+    var yuki=/期間の定めあり/.test(kubun);
+    var isShort=(weekH!==null&&fullWeek>0&&weekH<fullWeek);
+    var a=alvDays(dpw,weekH);
+    var wkRaw=F(r,'給与の種類');
+    var wk=(wkRaw==='時給')?'時間給':(wkRaw||'月給');
+
+    var e={};
+    e.name=F(r,'氏名');
+    e.issue=today();
+    e.hired=toIso(F(r,'雇入れ日'));
+    e.kubun=yuki?'契約社員（有期）':(isShort?'パート・アルバイト':'正社員');
+    e.form=isShort?'短時間労働者用（常用、有期雇用型）':'一般労働者用（常用、有期雇用型）';
+    e.termHas=yuki?'期間の定めあり':'期間の定めなし';
+    e.termFrom=toIso(F(r,'契約開始日')); e.termTo=toIso(F(r,'契約終了日'));
+    if(yuki){
+      e.renewKind='更新する場合があり得る';
+      e.renewCriteria='契約期間満了時の業務量・勤務成績、態度・能力・会社の経営状況・従事している業務の進捗状況';
+      e.limitTxt='無';
+    } else { e.renewKind='';e.renewCriteria='';e.limitTxt=''; }
+    e.muki='該当しない';
+    e.place1=place1; e.place2=place2;
+    e.job1=F(r,'仕事の内容'); e.job2=job2;
+    e.patName=p.name; e.start=p.start; e.end=p.end; e.brk=p.brk;
+    e.varType=p.varType; e.otYes=p.otYes;
+    e.otW='';e.otM='';e.otY='';e.hdwM='';e.hdwY='';
+    e.hdReg=comp.hdReg; e.hdIrr=comp.hdIrr; e.workDays=''; e.dpw=p.dpw;
+    e.alv=a.days?String(a.days[0]):'';
+    e.wageKind=wk; e.wageAmt=F(r,'金額');
+    var al=parseAllow(F(r,'手当'));
+    e.al1=al[0]; e.al2=al[1]; e.al3=al[2]; e.al4=al[3];
+    e.allowRaw=F(r,'手当');
+    e.raise=(ptR==='あり')?'有':'無';
+    e.bonus=(ptB==='あり')?'有':'無';
+    e.sever=(ptS==='あり')?'有':'無';
+    e.empIns=(weekH!==null&&weekH<20)?'無':comp.empInsDef;
+    e.other='';
+    return {comp:comp,emp:e,weekH:weekH,dayH:dayH,warn:warnOf(comp,e,dayH,weekH)};
   });
-  CO.cur=lastId;
-  coReload();
-  sv('formIn','');
-  tab(4);
-  msg('formMsg',added+'社を取り込みました。上のバーで会社を切り替えて確認してください。');
 }
 
-function dl(obj,name){
-  var b=new Blob([JSON.stringify(obj,null,1)],{type:'application/json'});
-  var a=document.createElement('a');
-  a.href=URL.createObjectURL(b);
-  a.download=name;
-  document.body.appendChild(a);a.click();document.body.removeChild(a);
+/* ===== 警告 ===== */
+function warnOf(c,e,dayH,weekH){
+  var w=[], flex=(e.varType!=='なし（通常の勤務）');
+  if(!e.name)w.push('氏名が空です');
+  if(!e.job1)w.push('仕事の内容が空です');
+  if(!e.wageAmt)w.push('賃金の金額が空です');
+  if(dayH===null)w.push('始業・終業から勤務時間を計算できません');
+  if(dayH!==null&&dayH>8&&!flex)w.push('1日の所定労働時間が'+fmtH(dayH)+'（8時間超・労基法32条）');
+  if(weekH!==null&&weekH>40&&!flex)w.push('週の所定労働時間が'+fmtH(weekH)+'（40時間超・労基法32条）');
+  var b=+e.brk||0, work=(dayH!==null)?dayH+b/60:null;
+  if(work!==null){
+    if(work>8&&b<60)w.push('休憩'+b+'分（8時間超は60分以上・労基法34条）');
+    else if(work>6&&b<45)w.push('休憩'+b+'分（6時間超は45分以上・労基法34条）');
+  }
+  if(e.termHas==='期間の定めあり'&&(!e.termFrom||!e.termTo))w.push('有期契約ですが契約期間が空です');
+  if(!c.payCut||!c.payDay)w.push('賃金の締切日または支払日が空です');
+  if(!c.compRep)w.push('代表者職氏名が空です');
+  if(!c.w1tel)w.push('電話番号が空です（相談窓口の連絡先に使います）');
+  return w;
 }
-function dlJson(){
-  save();
-  dl(CO,'労働条件通知書_全社データ_'+today()+'.json');
+
+/* ===== 一覧表示 ===== */
+function draw(notFound){
+  var warnN=ROWS.filter(function(x){return x.warn.length}).length;
+  var cos={};ROWS.forEach(function(x){cos[x.comp.compName]=1});
+  var nCo=Object.keys(cos).length;
+
+  var m='<div class="ok"><b>'+nCo+'社・'+ROWS.length+'名を読み取りました。</b>'
+      + (warnN?'　うち <b>'+warnN+'名</b> に確認したい点があります（下の表の赤い字）。':'　確認が必要な点はありません。')+'</div>';
+  if(notFound.length){
+    m+='<div class="note">見つからなかった列：'+esc(notFound.join('、'))
+      +'<br>その項目は空欄のまま出力します。フォームの様式が変わっていないか確認してください。</div>';
+  }
+  el('msg').innerHTML=m;
+
+  var h='<table class="list"><tr>'
+    +'<th style="width:34px"></th><th>会社</th><th>氏名</th><th>区分</th><th>様式</th>'
+    +'<th>勤務</th><th>賃金</th><th>年休</th><th>確認</th><th style="width:72px"></th></tr>';
+  ROWS.forEach(function(x,i){
+    var e=x.emp;
+    h+='<tr'+(x.warn.length?' class="warn"':'')+'>'
+      +'<td class="c"><input type="checkbox" class="sel" data-i="'+i+'" checked style="width:19px;height:19px"></td>'
+      +'<td class="co">'+esc(e.place1.replace(/（.*/,''))+'</td>'
+      +'<td><b>'+esc(e.name||'（空）')+'</b></td>'
+      +'<td>'+esc(e.kubun)+(e.termHas==='期間の定めあり'?'<div class="hint">'+esc(jpDate(e.termFrom))+'〜'+esc(jpDate(e.termTo))+'</div>':'')+'</td>'
+      +'<td><span class="tag '+(e.form.indexOf('短時間')===0?'tanji':'ippan')+'">'+(e.form.indexOf('短時間')===0?'短時間':'一般')+'</span></td>'
+      +'<td>'+esc(e.start)+'〜'+esc(e.end)+'<div class="hint">休憩'+esc(e.brk)+'分／週'+esc(e.dpw)+'日'
+        +(x.weekH!==null?'（'+fmtH(x.weekH)+'）':'')+'</div></td>'
+      +'<td>'+esc(e.wageKind)+' '+comma(e.wageAmt)+'円'+(e.allowRaw?'<div class="hint">'+esc(e.allowRaw)+'</div>':'')+'</td>'
+      +'<td class="c">'+esc(e.alv)+'日</td>'
+      +'<td>'+(x.warn.length?'<div class="w">・'+x.warn.map(esc).join('<br>・')+'</div>':'<span style="color:#1a5e3c">—</span>')+'</td>'
+      +'<td class="c"><button class="btn out sm" onclick="printOne('+i+')">通知書</button></td>'
+      +'</tr>';
+  });
+  h+='</table>';
+  el('list').innerHTML=h;
+  show('resultCard',true);show('printCard',true);
+  el('resultCard').scrollIntoView({behavior:'smooth',block:'start'});
 }
-function dlJsonOne(){
-  save();
-  var o=CO.cos[CO.cur];
-  dl({one:true,label:coLabel(o),comp:o.comp,pats:o.pats,emps:o.emps},
-     '労働条件通知書_'+coLabel(o).replace(/[\\\/:*?"<>|]/g,'_')+'_'+today()+'.json');
+function selAll(b){
+  var n=document.querySelectorAll('.sel');
+  for(var i=0;i<n.length;i++)n[i].checked=b;
 }
-function ldJson(inp){
-  var f=inp.files&&inp.files[0];if(!f)return;
-  var r=new FileReader();
-  r.onload=function(){
-    try{
-      var d=JSON.parse(r.result);
-      if(d&&d.cos&&Object.keys(d.cos).length){
-        /* 全社ファイル：丸ごと置き換え */
-        if(!confirm('いまの'+Object.keys(CO.cos).length+'社を、ファイルの'+Object.keys(d.cos).length+'社に置き換えます。よろしいですか？')){inp.value='';return}
-        CO=d;
-        if(!CO.cos[CO.cur])CO.cur=Object.keys(CO.cos)[0];
-        coReload();
-        alert(Object.keys(CO.cos).length+'社を読み込みました。');
-      } else if(d&&(d.comp||d.emps||d.pats)){
-        /* 1社ファイル（旧形式も含む）：新しい会社として追加する。いまの会社は消さない */
-        var id=newId();
-        CO.cos[id]={
-          label:String(d.label||''),
-          comp:d.comp||{},
-          pats:(d.pats&&d.pats.length)?d.pats:defaultPats(),
-          emps:d.emps||[],
-          updated:today()
-        };
-        CO.cur=id;
-        coReload();
-        alert('「'+coLabel(CO.cos[id])+'」を1社として追加しました。');
-      } else {
-        alert('このファイルには読み込める内容がありません。');
-      }
-    }catch(e){alert('ファイルを読み込めませんでした。')}
-    inp.value='';
-  };
-  r.readAsText(f);
+
+/* ===== 印刷 ===== */
+function printRows(list){
+  if(!list.length){alert('印刷する人が選ばれていません。');return}
+  el('printArea').innerHTML=list.map(function(x){ S.comp=x.comp; return buildDoc(x.emp) }).join('');
+  window.print();
 }
-function resetAll(){
-  var n=Object.keys(CO.cos).length;
-  if(!confirm('登録されている'+n+'社ぶんの会社設定・勤務パターン・従業員を、すべて消します。元に戻せません。よろしいですか？'))return;
-  if(!confirm('本当に'+n+'社すべて消してよろしいですか？'))return;
-  try{localStorage.removeItem(LS2);localStorage.removeItem(LS)}catch(e){}
-  location.reload();
+function printOne(i){printRows([ROWS[i]])}
+function printSel(){
+  var n=document.querySelectorAll('.sel'),l=[];
+  for(var i=0;i<n.length;i++) if(n[i].checked) l.push(ROWS[+n[i].getAttribute('data-i')]);
+  printRows(l);
 }
 
 /* ========== 通知書の組み立て ========== */
@@ -1632,41 +612,6 @@ function buildDoc(e){
     + '</div>';
   return h;
 }
-
-/* ========== 印刷 ========== */
-function printDocs(list){
-  if(!list.length){alert('印刷する人が選ばれていません。');return}
-  var missing=[];
-  if(!S.comp.compName)missing.push('事業場名称');
-  if(!S.comp.compRep)missing.push('使用者職氏名');
-  if(missing.length && !confirm('①会社設定の「'+missing.join('」「')+'」が空欄です。空欄のまま印刷しますか？'))return;
-  el('printArea').innerHTML=list.map(buildDoc).join('');
-  window.print();
-}
-function printOne(i){save();printDocs([S.emps[i]])}
-function printSel(){
-  save();
-  var n=document.querySelectorAll('.esel'),l=[];
-  for(var i=0;i<n.length;i++) if(n[i].checked) l.push(S.emps[+n[i].getAttribute('data-i')]);
-  printDocs(l);
-}
-
-/* ========== 起動 ========== */
-(function init(){
-  captureDefaults();   /* HTMLの初期値を控えてから読み込む（新規会社の初期状態に使う） */
-  load();
-  COMPCOLS.forEach(function(c){
-    var e=el('c_'+c[0]);
-    if(e)e.addEventListener('change',function(){save();render()});
-  });
-  EMPCOLS.forEach(function(c){
-    var e=el('e_'+c[0]);
-    if(e)e.addEventListener('change',render);
-  });
-  el('e_alv').addEventListener('input',function(){alvTouched=true});
-  save();                 /* 初回も S.comp に初期値を取り込む（通知書が空欄になるのを防ぐ） */
-  empNew();patList();patPick();empList();render();tab(1);
-})();
 </script>
 </body>
 </html>
