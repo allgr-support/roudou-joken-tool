@@ -13,7 +13,15 @@
   header{background:linear-gradient(135deg,#0e7c86,#0a5b62);color:#fff;padding:18px 16px}
   header h1{font-size:18px;font-weight:800}
   header p{font-size:12.5px;opacity:.93;margin-top:6px;line-height:1.5}
-  nav{background:#fff;border-bottom:1px solid var(--line);position:sticky;top:0;z-index:20;
+  #stickytop{position:sticky;top:0;z-index:20}
+  .cobar{background:#0a5b62;color:#fff;padding:7px 10px;display:flex;align-items:center;gap:8px}
+  .cobar .k{font-size:11px;font-weight:700;opacity:.85;flex:0 0 auto;letter-spacing:.08em}
+  .cobar select{flex:1 1 auto;min-width:0;width:auto;padding:7px 9px;font-size:14px;font-weight:700;
+      border:none;border-radius:7px;background:#fff;color:var(--acc-d)}
+  .cobar .coadd{flex:0 0 auto;background:rgba(255,255,255,.18);color:#fff;border:1px solid rgba(255,255,255,.45);
+      border-radius:7px;padding:7px 10px;font-size:12.5px;font-weight:700;cursor:pointer;font-family:inherit;white-space:nowrap}
+  .cobar .coadd:active{background:rgba(255,255,255,.32)}
+  nav{background:#fff;border-bottom:1px solid var(--line);
       display:flex;overflow-x:auto;-webkit-overflow-scrolling:touch}
   nav button{flex:1 0 auto;min-width:96px;padding:13px 10px;border:none;background:none;font:inherit;
       font-size:13px;font-weight:700;color:var(--sub);cursor:pointer;border-bottom:3px solid transparent}
@@ -125,17 +133,38 @@
   <p>厚生労働省モデル様式（<b>令和8年10月1日以降に使用する版</b>／一般労働者用・短時間労働者用）に沿って下書きを作ります。入力はこの端末内だけで処理され、どこにも送信されません。</p>
 </header>
 
-<nav>
-  <button id="tb1" class="on" onclick="tab(1)">① 会社設定</button>
-  <button id="tb2" onclick="tab(2)">② 勤務パターン</button>
-  <button id="tb3" onclick="tab(3)">③ 従業員入力</button>
-  <button id="tb4" onclick="tab(4)">④ 一覧・出力</button>
-</nav>
+<div id="stickytop">
+  <div class="cobar">
+    <span class="k">編集中</span>
+    <select id="coSel" onchange="coSwitch(this.value)" aria-label="編集中の会社"></select>
+    <button class="coadd" onclick="coAdd()">＋ 会社</button>
+  </div>
+  <nav>
+    <button id="tb1" class="on" onclick="tab(1)">① 会社設定</button>
+    <button id="tb2" onclick="tab(2)">② 勤務パターン</button>
+    <button id="tb3" onclick="tab(3)">③ 従業員入力</button>
+    <button id="tb4" onclick="tab(4)">④ 一覧・出力</button>
+  </nav>
+</div>
 
 <!-- ============ ① 会社設定 ============ -->
 <div class="wrap" id="p1">
+  <div class="card" id="coCard">
+    <h2><span class="n">★</span>この会社</h2>
+    <div class="hint">1台のPCで複数社を扱えます。会社ごとに設定・勤務パターン・従業員は<b>完全に分かれます</b>。切替は上の青いバーから。</div>
+    <label>一覧での表示名</label>
+    <input id="coName" placeholder="（空欄なら事業場名称をそのまま使います）" onchange="coRename()">
+    <div class="btns">
+      <button class="btn out" onclick="coAdd()">＋ 新しい会社を追加</button>
+      <button class="btn out" onclick="coDup()">この会社を複製</button>
+      <button class="btn red" onclick="coDel()">この会社を削除</button>
+    </div>
+    <div class="hint">「複製」は会社設定と勤務パターンだけを引き継ぎます（従業員は空）。同じ会社の別事業場を作るときに使います。</div>
+    <div class="msg" id="coMsg"></div>
+  </div>
+
   <div class="info">
-    <b>ここは最初に1回だけ入力します。</b>以後は保存され、全従業員に自動で反映されます。入力の大半はこのタブで片付きます。
+    <b>ここは会社ごとに1回だけ入力します。</b>以後は保存され、その会社の全従業員に自動で反映されます。入力の大半はこのタブで片付きます。
   </div>
 
   <div class="card">
@@ -293,10 +322,12 @@
     <h2><span class="n">9</span>設定のバックアップ</h2>
     <div class="hint">ブラウザに自動保存されますが、PCを変える・担当者に渡すときはファイルで受け渡します。従業員データも含まれます。</div>
     <div class="btns">
-      <button class="btn out" onclick="dlJson()">設定をファイルに保存</button>
+      <button class="btn out" onclick="dlJson()">全社まとめて保存</button>
+      <button class="btn out" onclick="dlJsonOne()">この会社だけ保存</button>
       <button class="btn out" onclick="document.getElementById('upJson').click()">ファイルから読込</button>
       <button class="btn red" onclick="resetAll()">すべて消す</button>
     </div>
+    <div class="hint">読込は中身で動きが変わります。<b>全社ファイル＝丸ごと置き換え</b>（確認あり）、<b>1社ファイル＝新しい会社として追加</b>（いまの会社は消えません）。</div>
     <input type="file" id="upJson" accept=".json" class="hide" onchange="ldJson(this)">
   </div>
 </div>
@@ -515,6 +546,7 @@
 <div class="wrap hide" id="p4">
   <div class="card">
     <h2><span class="n">1</span>登録した従業員</h2>
+    <div class="info" id="coNote4"></div>
     <div id="empList"></div>
     <div class="btns">
       <button class="btn" onclick="printSel()">チェックした人の通知書を印刷（PDF保存）</button>
@@ -580,7 +612,8 @@
 
 <script>
 /* ========== 定数 ========== */
-var LS = 'rodojoken_tool_v1';
+var LS  = 'rodojoken_tool_v1';   /* 旧：1社だけ保存していた形式。移行のためだけに読む */
+var LS2 = 'rodojoken_tool_v2';   /* 現行：会社（案件）スロットを複数持つ形式 */
 
 var COMPCOLS = [
  ['compName','事業場名称'],['compAddr','事業場所在地'],['compRep','使用者職氏名'],
@@ -626,7 +659,10 @@ var RC = ['契約期間満了時の業務量','勤務成績、態度','能力','
 var ALV_FULL = [10,11,12,14,16,18,20];
 var ALV_PROP = {4:[7,8,9,10,12,13,15],3:[5,6,6,8,9,10,11],2:[3,4,4,5,6,6,7],1:[1,2,2,2,3,3,3]};
 
+/* S = いま画面で編集している1社ぶん。CO = 全社ぶんの保管庫 */
 var S = {comp:{}, pats:[], emps:[], editEmp:-1, editPat:-1, curTab:1};
+var CO = {cur:'', cos:{}};   /* cos[id] = {label, comp, pats, emps, updated} */
+var DEF = {};                /* HTMLに書いてある初期値（割増率の法定下限など）。新規会社の初期状態に使う */
 /* 年休日数を手で直したかどうか。手入力していない間は勤務条件の変更に追従して自動計算する */
 var alvTouched = false;
 
@@ -646,25 +682,129 @@ function mins(t){var m=/^(\d{1,2}):(\d{2})$/.exec(t||'');return m?(+m[1])*60+(+m
 function hhmm(t){var m=/^(\d{1,2}):(\d{2})$/.exec(t||'');return m?{h:+m[1],m:+m[2]}:null}
 function comma(n){if(n===null||n===''||n===undefined)return '';return String(n).replace(/\B(?=(\d{3})+(?!\d))/g,',')}
 
-/* ========== 保存・復元 ========== */
+/* ========== 会社（案件）スロット ========== */
+function newId(){return 'c'+Date.now().toString(36)+Math.random().toString(36).slice(2,6)}
+function defaultPats(){
+  return [
+    {name:'常勤（9:00-18:00／土日祝休）',start:'09:00',end:'18:00',brk:'60',varType:'なし（通常の勤務）',otYes:'有',dpw:'5',hdReg:'毎週土曜日・日曜日、国民の祝日',hdIrr:'',workDays:'毎週月〜金曜日',otW:'',otM:'',otY:'',hdwM:'',hdwY:''},
+    {name:'パート（10:00-15:00／週3日）',start:'10:00',end:'15:00',brk:'0',varType:'なし（通常の勤務）',otYes:'無',dpw:'3',hdReg:'',hdIrr:'シフトによる（週4日）',workDays:'毎週月・水・金曜日',otW:'',otM:'',otY:'',hdwM:'',hdwY:''},
+    {name:'シフト勤務（1か月単位の変形）',start:'08:00',end:'17:00',brk:'60',varType:'1か月単位の変形労働時間制',otYes:'有',dpw:'5',hdReg:'',hdIrr:'月当たり8日（シフト表により指定）',workDays:'シフト表による',otW:'',otM:'',otY:'',hdwM:'',hdwY:''}
+  ];
+}
+function captureDefaults(){ COMPCOLS.forEach(function(c){var e=el('c_'+c[0]);DEF[c[0]]=e?e.value:''}) }
+function coLabel(o){
+  if(!o)return '（未設定）';
+  var l=String(o.label||'').trim();
+  if(l)return l;
+  var n=String((o.comp&&o.comp.compName)||'').trim();
+  return n||'（会社名未入力）';
+}
+function coBar(){
+  var s=el('coSel');if(!s)return;
+  var ids=Object.keys(CO.cos);
+  s.innerHTML=ids.map(function(id){
+    var o=CO.cos[id],n=(o.emps||[]).length;
+    return '<option value="'+id+'">'+esc(coLabel(o))+(n?'（'+n+'名）':'')+'</option>';
+  }).join('');
+  s.value=CO.cur;
+  var t=el('coNote4');
+  if(t)t.innerHTML='<b>'+esc(coLabel(CO.cos[CO.cur]))+'</b> の従業員です。他社に切り替えると一覧も入れ替わります。';
+}
+/* いま画面にある内容を、いまの会社スロットへ書き戻して保存する */
 function save(){
   COMPCOLS.forEach(function(c){S.comp[c[0]]=gv('c_'+c[0])});
-  try{localStorage.setItem(LS,JSON.stringify({comp:S.comp,pats:S.pats,emps:S.emps}))}catch(e){}
+  var o=CO.cos[CO.cur];
+  if(o){o.comp=S.comp;o.pats=S.pats;o.emps=S.emps;o.updated=today()}
+  try{localStorage.setItem(LS2,JSON.stringify(CO))}catch(e){}
+  coBar();
+}
+function persist(){ try{localStorage.setItem(LS2,JSON.stringify(CO))}catch(e){} }
+/* いまの会社スロットの内容を画面へ流し込む */
+function applyCo(){
+  var o=CO.cos[CO.cur];if(!o)return;
+  S.comp=o.comp||{};
+  S.pats=(o.pats&&o.pats.length)?o.pats:defaultPats();
+  S.emps=o.emps||[];
+  COMPCOLS.forEach(function(c){
+    sv('c_'+c[0], Object.prototype.hasOwnProperty.call(S.comp,c[0]) ? S.comp[c[0]] : DEF[c[0]]);
+  });
+  sv('coName',o.label||'');
+  coBar();
+}
+/* 会社を切り替えたあと、画面の各タブを作り直す共通処理 */
+function coReload(){
+  S.editEmp=-1;
+  applyCo();
+  empNew();patList();patPick();empList();render();
+  persist();
 }
 function load(){
   var d=null;
-  try{d=JSON.parse(localStorage.getItem(LS)||'null')}catch(e){}
-  if(d){S.comp=d.comp||{};S.pats=d.pats||[];S.emps=d.emps||[]}
-  /* 保存済みのキーだけ上書きする（初回はHTMLの初期値＝法定下限などを残す） */
-  COMPCOLS.forEach(function(c){ if(d && Object.prototype.hasOwnProperty.call(S.comp,c[0])) sv('c_'+c[0],S.comp[c[0]]) });
-  if(!S.pats.length){
-    S.pats=[
-      {name:'常勤（9:00-18:00／土日祝休）',start:'09:00',end:'18:00',brk:'60',varType:'なし（通常の勤務）',otYes:'有',dpw:'5',hdReg:'毎週土曜日・日曜日、国民の祝日',hdIrr:'',workDays:'毎週月〜金曜日',otW:'',otM:'',otY:'',hdwM:'',hdwY:''},
-      {name:'パート（10:00-15:00／週3日）',start:'10:00',end:'15:00',brk:'0',varType:'なし（通常の勤務）',otYes:'無',dpw:'3',hdReg:'',hdIrr:'シフトによる（週4日）',workDays:'毎週月・水・金曜日',otW:'',otM:'',otY:'',hdwM:'',hdwY:''},
-      {name:'シフト勤務（1か月単位の変形）',start:'08:00',end:'17:00',brk:'60',varType:'1か月単位の変形労働時間制',otYes:'有',dpw:'5',hdReg:'',hdIrr:'月当たり8日（シフト表により指定）',workDays:'シフト表による',otW:'',otM:'',otY:'',hdwM:'',hdwY:''}
-    ];
+  try{d=JSON.parse(localStorage.getItem(LS2)||'null')}catch(e){}
+  if(d&&d.cos&&Object.keys(d.cos).length){
+    CO=d;
+    if(!CO.cos[CO.cur])CO.cur=Object.keys(CO.cos)[0];
+  } else {
+    /* 旧形式（1社だけ）があれば、1社目として引き継ぐ */
+    var old=null;
+    try{old=JSON.parse(localStorage.getItem(LS)||'null')}catch(e){}
+    var id=newId();
+    CO={cur:id,cos:{}};
+    CO.cos[id]={
+      label:'',
+      comp:(old&&old.comp)||{},
+      pats:(old&&old.pats&&old.pats.length)?old.pats:defaultPats(),
+      emps:(old&&old.emps)||[],
+      updated:today()
+    };
   }
+  applyCo();
   if(!gv('e_issue'))sv('e_issue',today());
+}
+function coSwitch(id){
+  if(!CO.cos[id]||id===CO.cur){coBar();return}
+  save();
+  CO.cur=id;
+  coReload();
+  tab(S.curTab);
+  msgTop(coLabel(CO.cos[id])+' に切替');
+}
+function coAdd(){
+  save();
+  var id=newId();
+  CO.cos[id]={label:'',comp:{},pats:defaultPats(),emps:[],updated:today()};
+  CO.cur=id;
+  coReload();
+  tab(1);window.scrollTo(0,0);
+  msg('coMsg','新しい会社を追加しました。事業場名称から入力してください。');
+}
+function coDup(){
+  save();
+  var src=CO.cos[CO.cur],id=newId();
+  CO.cos[id]={
+    label:coLabel(src)+'（コピー）',
+    comp:JSON.parse(JSON.stringify(src.comp||{})),
+    pats:JSON.parse(JSON.stringify(src.pats||defaultPats())),
+    emps:[],updated:today()
+  };
+  CO.cur=id;
+  coReload();
+  tab(1);window.scrollTo(0,0);
+  msg('coMsg','会社設定と勤務パターンを複製しました（従業員は空です）。表示名と事業場名称を直してください。');
+}
+function coDel(){
+  if(Object.keys(CO.cos).length<=1){msg('coMsg','最後の1社は削除できません。消すなら「すべて消す」を使ってください。',true);return}
+  var o=CO.cos[CO.cur];
+  if(!confirm('「'+coLabel(o)+'」の会社設定・勤務パターン・従業員'+(o.emps||[]).length+'件をすべて削除します。元に戻せません。よろしいですか？'))return;
+  delete CO.cos[CO.cur];
+  CO.cur=Object.keys(CO.cos)[0];
+  coReload();
+  msg('coMsg','削除しました。');
+}
+function coRename(){
+  var o=CO.cos[CO.cur];if(!o)return;
+  o.label=gv('coName');
+  save();
 }
 
 /* ========== タブ ========== */
@@ -1061,13 +1201,22 @@ function importTsv(kind){
     S.emps=list;save();empList();msg(mid,list.length+'件を取り込みました');
   }
 }
-function dlJson(){
-  save();
-  var b=new Blob([JSON.stringify({comp:S.comp,pats:S.pats,emps:S.emps},null,1)],{type:'application/json'});
+function dl(obj,name){
+  var b=new Blob([JSON.stringify(obj,null,1)],{type:'application/json'});
   var a=document.createElement('a');
   a.href=URL.createObjectURL(b);
-  a.download='労働条件通知書_設定_'+today()+'.json';
+  a.download=name;
   document.body.appendChild(a);a.click();document.body.removeChild(a);
+}
+function dlJson(){
+  save();
+  dl(CO,'労働条件通知書_全社データ_'+today()+'.json');
+}
+function dlJsonOne(){
+  save();
+  var o=CO.cos[CO.cur];
+  dl({one:true,label:coLabel(o),comp:o.comp,pats:o.pats,emps:o.emps},
+     '労働条件通知書_'+coLabel(o).replace(/[\\\/:*?"<>|]/g,'_')+'_'+today()+'.json');
 }
 function ldJson(inp){
   var f=inp.files&&inp.files[0];if(!f)return;
@@ -1075,19 +1224,39 @@ function ldJson(inp){
   r.onload=function(){
     try{
       var d=JSON.parse(r.result);
-      S.comp=d.comp||{};S.pats=d.pats||[];S.emps=d.emps||[];
-      COMPCOLS.forEach(function(c){sv('c_'+c[0],S.comp[c[0]])});
-      save();patList();patPick();empList();render();
-      alert('読み込みました。');
+      if(d&&d.cos&&Object.keys(d.cos).length){
+        /* 全社ファイル：丸ごと置き換え */
+        if(!confirm('いまの'+Object.keys(CO.cos).length+'社を、ファイルの'+Object.keys(d.cos).length+'社に置き換えます。よろしいですか？')){inp.value='';return}
+        CO=d;
+        if(!CO.cos[CO.cur])CO.cur=Object.keys(CO.cos)[0];
+        coReload();
+        alert(Object.keys(CO.cos).length+'社を読み込みました。');
+      } else if(d&&(d.comp||d.emps||d.pats)){
+        /* 1社ファイル（旧形式も含む）：新しい会社として追加する。いまの会社は消さない */
+        var id=newId();
+        CO.cos[id]={
+          label:String(d.label||''),
+          comp:d.comp||{},
+          pats:(d.pats&&d.pats.length)?d.pats:defaultPats(),
+          emps:d.emps||[],
+          updated:today()
+        };
+        CO.cur=id;
+        coReload();
+        alert('「'+coLabel(CO.cos[id])+'」を1社として追加しました。');
+      } else {
+        alert('このファイルには読み込める内容がありません。');
+      }
     }catch(e){alert('ファイルを読み込めませんでした。')}
     inp.value='';
   };
   r.readAsText(f);
 }
 function resetAll(){
-  if(!confirm('会社設定・勤務パターン・従業員のすべてを消します。元に戻せません。よろしいですか？'))return;
-  if(!confirm('本当に消してよろしいですか？'))return;
-  try{localStorage.removeItem(LS)}catch(e){}
+  var n=Object.keys(CO.cos).length;
+  if(!confirm('登録されている'+n+'社ぶんの会社設定・勤務パターン・従業員を、すべて消します。元に戻せません。よろしいですか？'))return;
+  if(!confirm('本当に'+n+'社すべて消してよろしいですか？'))return;
+  try{localStorage.removeItem(LS2);localStorage.removeItem(LS)}catch(e){}
   location.reload();
 }
 
@@ -1283,6 +1452,7 @@ function printSel(){
 
 /* ========== 起動 ========== */
 (function init(){
+  captureDefaults();   /* HTMLの初期値を控えてから読み込む（新規会社の初期状態に使う） */
   load();
   COMPCOLS.forEach(function(c){
     var e=el('c_'+c[0]);
