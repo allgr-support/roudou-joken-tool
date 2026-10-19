@@ -1156,17 +1156,34 @@ function showTsv(kind){
   var id=(kind==='comp'?'tsvComp':'tsvEmp');
   el(id).value=buildTsv(kind);show(id,true);
 }
+/* 古い方式でのコピー。LINE等のアプリ内ブラウザでは新しいClipboard APIが
+   権限で弾かれることがあるため、必ずこちらを保険に用意しておく */
+function copyLegacy(id){
+  var a=el(id);if(!a)return false;
+  try{
+    a.removeAttribute('readonly');
+    a.focus();
+    a.setSelectionRange(0,a.value.length);   /* iOSは select() だけだと効かないことがある */
+    var ok=document.execCommand('copy');
+    a.setAttribute('readonly','readonly');
+    window.getSelection().removeAllRanges();
+    return !!ok;
+  }catch(e){
+    try{a.setAttribute('readonly','readonly')}catch(e2){}
+    return false;
+  }
+}
 function copyTsv(kind){
   var t=buildTsv(kind),mid=(kind==='comp'?'tsvMsg2':'tsvMsg1');
   if(kind==='emp'&&!S.emps.length){msg(mid,'従業員が登録されていません',true);return}
   showTsv(kind);
   var id=(kind==='comp'?'tsvComp':'tsvEmp');
+  var done=function(){msg(mid,'コピーしました。スプレッドシートのA1に貼り付けてください')};
+  var fail=function(){msg(mid,'自動コピーできませんでした。下の黒い枠を長押し→全選択→コピーしてください',true)};
   if(navigator.clipboard&&navigator.clipboard.writeText){
-    navigator.clipboard.writeText(t).then(function(){msg(mid,'コピーしました。スプレッドシートのA1に貼り付けてください')},
-      function(){msg(mid,'コピーできませんでした。下の黒い枠を長押し→全選択→コピーしてください',true)});
+    navigator.clipboard.writeText(t).then(done,function(){ if(!copyLegacy(id))fail() });
   } else {
-    var a=el(id);a.focus();a.select();
-    try{document.execCommand('copy');msg(mid,'コピーしました')}catch(e){msg(mid,'下の黒い枠を長押し→全選択→コピーしてください',true)}
+    if(!copyLegacy(id))fail();
   }
 }
 function importTsv(kind){
