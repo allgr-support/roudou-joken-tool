@@ -166,7 +166,9 @@ var COLS=['送信日時','事業場名称','事業場所在地','代表者職氏
  'パート昇給','パート賞与','パート退職金',
  '氏名','雇入れ日','雇用の形','契約開始日','契約終了日','仕事の内容',
  '勤務パターン名','始業','終業','休憩分','週勤務日数','残業','勤務時間の形',
- '給与の種類','金額','手当'];
+ '給与の種類','金額','手当',
+ '更新上限の有無','更新上限の内容',
+ '相談窓口部署','相談窓口担当者','相談窓口連絡先'];
 /* これが1つでも欠けていたら、見出し行として認めない */
 var MUST=['事業場名称','氏名','雇用の形','仕事の内容','始業','終業','休憩分','週勤務日数','給与の種類','金額'];
 
@@ -210,6 +212,9 @@ function alvDays(dpw,weekH){
 function parseAllow(s){
   var t=String(s||'').trim();
   if(!t)return ['','','',''];
+  /* 「通勤手当5,000円」の桁区切りカンマを、手当と手当の区切りと取り違えないように先に外す。
+     これを外さないと「通勤手当 5円」と「000円」の2件に割れる */
+  var prev; do{ prev=t; t=t.replace(/(\d),(\d{3})(?!\d)/g,'$1$2') }while(t!==prev);
   var parts=t.split(/[、,，\n]+/).map(function(x){return x.trim()}).filter(Boolean);
   var out=parts.slice(0,4).map(function(p){
     var m=/^(.*?)[\s:：]*([0-9][0-9,]*)\s*円?$/.exec(p);
@@ -295,7 +300,9 @@ function buildCompany(key,rs,F){
   comp.founder='無'; comp.quitDays='14'; comp.dismissal=DISMISS_DEFAULT;
   comp.siKosei=kosei; comp.siKenpo=kosei; comp.siOther=''; comp.empInsDef=koyo;
   comp.chutaikyo='加入していない'; comp.pension='無';
-  comp.w1dept=key; comp.w1name=rep; comp.w1tel=tel;
+  /* 相談窓口は既定では代表者。フォームで「代表者と異なる」を選んだ分だけ差し替える */
+  var dDept=F(r0,'相談窓口部署'), dName=F(r0,'相談窓口担当者'), dTel=F(r0,'相談窓口連絡先');
+  comp.w1dept=dDept||key; comp.w1name=dName||rep; comp.w1tel=dTel||tel;
   comp.w2same='同じ（同上と記載）';
   comp.artTime=''; comp.artHoliday=''; comp.artVac=''; comp.artWage=''; comp.artRetire='';
   comp.rulesName='';
@@ -347,7 +354,8 @@ function buildCompany(key,rs,F){
     if(yuki){
       e.renewKind='更新する場合があり得る';
       e.renewCriteria='契約期間満了時の業務量・勤務成績、態度・能力・会社の経営状況・従事している業務の進捗状況';
-      e.limitTxt='無';
+      var lh=F(r,'更新上限の有無'), lt=F(r,'更新上限の内容');
+      e.limitTxt=(lh==='有')?('有（'+(lt||'通算5年まで')+'）'):'無';
     } else { e.renewKind='';e.renewCriteria='';e.limitTxt=''; }
     e.muki='該当しない';
     e.place1=place1; e.place2=place2;

@@ -105,6 +105,21 @@
     <input id="f_compTel" data-req type="tel" placeholder="098-000-0000" oninput="upd()">
     <div class="hint">通知書に記載する「相談窓口の連絡先」として使います（パート・契約社員の方がいる場合、法律で必要です）。</div>
 
+    <label>相談窓口の担当者</label>
+    <select id="f_deskOther" onchange="upd()">
+      <option>代表者と同じ</option>
+      <option>代表者と異なる</option>
+    </select>
+    <div id="deskBox" class="hide">
+      <div class="row">
+        <div><label>部署名</label><input id="f_deskDept" placeholder="総務課"></div>
+        <div><label>担当者の役職・氏名</label><input id="f_deskName" placeholder="総務課長　田中花子"></div>
+      </div>
+      <label>連絡先</label>
+      <input id="f_deskTel" type="tel" placeholder="098-000-0000">
+      <div class="hint">空欄にしたところは、代表者の情報で埋めます。</div>
+    </div>
+
     <label>就業規則<span class="req">必須</span></label>
     <select id="f_rules" data-req onchange="upd()">
       <option value="">選んでください</option>
@@ -366,7 +381,7 @@ function alvFirst(dpw,weekH){
 /* ===== 従業員 ===== */
 function addEmp(src){
   /* kubun の既定は、選択肢の文字列と完全に一致させること（表示と保存値がずれるため） */
-  var e = src ? JSON.parse(JSON.stringify(src)) : {kubun:'正社員（期間の定めなし）',hired:'',term:'',termTo:'',job:'',pat:'',wageKind:'月給',wage:'',allow:''};
+  var e = src ? JSON.parse(JSON.stringify(src)) : {kubun:'正社員（期間の定めなし）',hired:'',term:'',termTo:'',job:'',pat:'',wageKind:'月給',wage:'',allow:'',limitHas:'無',limitTxt:''};
   e.id=++seq; e.name = src ? '' : '';
   EMP.push(e); drawEmp(); upd();
   if(src){ setTimeout(function(){ var n=document.querySelector('[data-emp="'+e.id+'"]'); if(n)n.scrollIntoView({block:'center'}) },30) }
@@ -374,7 +389,7 @@ function addEmp(src){
 function delEmp(id){ EMP=EMP.filter(function(e){return e.id!==id}); drawEmp(); upd() }
 function setEmp(id,k,v){
   EMP.forEach(function(e){if(e.id===id)e[k]=v});
-  if(k==='kubun')drawEmp();
+  if(k==='kubun'||k==='limitHas')drawEmp();
   upd();
 }
 function patOpts(sel){
@@ -407,7 +422,18 @@ function drawEmp(){
       + (yuki ? '<div class="row">'
           + '<div><label>契約開始日<span class="req">必須</span></label><input type="date" value="'+esc(e.term)+'" onchange="setEmp('+e.id+',\'term\',this.value)"></div>'
           + '<div><label>契約終了日<span class="req">必須</span></label><input type="date" value="'+esc(e.termTo)+'" onchange="setEmp('+e.id+',\'termTo\',this.value)"></div>'
-          + '</div><div class="hint">更新の基準と更新上限は、法律どおりの定型文でこちらが記載します。</div>' : '')
+          + '</div>'
+          + '<div class="row">'
+          + '<div><label>更新上限の有無</label><select onchange="setEmp('+e.id+',\'limitHas\',this.value)">'
+          +   ['無','有'].map(function(x){return '<option'+((e.limitHas||'無')===x?' selected':'')+'>'+x+'</option>'}).join('')
+          + '</select></div>'
+          + ((e.limitHas==='有')
+              ? '<div><label>上限の内容<span class="req">必須</span></label><input value="'+esc(e.limitTxt||'')+'" placeholder="通算5年まで" oninput="setEmp('+e.id+',\'limitTxt\',this.value)"></div>'
+              : '<div></div>')
+          + '</div>'
+          + '<div class="hint">更新の基準は、法律どおりの定型文でこちらが記載します。'
+          + (e.limitHas==='有' ? '上限は「有（上記の内容）」と記載します。' : '上限を定めていなければ「無」のままで結構です。')
+          + '</div>' : '')
       + '<label>仕事の内容<span class="req">必須</span></label>'
       + '<input value="'+esc(e.job)+'" placeholder="フロント業務、予約管理" oninput="setEmp('+e.id+',\'job\',this.value)">'
       + '<label>勤務パターン<span class="req">必須</span></label>'
@@ -458,10 +484,12 @@ function missing(){
     if(!e.pat)m.push({sec:7,t:n+'の勤務パターン'});
     if(!e.wage)m.push({sec:7,t:n+'の金額'});
     if(e.kubun==='契約社員・パート（期間の定めあり）'&&(!e.term||!e.termTo))m.push({sec:7,t:n+'の契約期間'});
+    if(e.kubun==='契約社員・パート（期間の定めあり）'&&e.limitHas==='有'&&!String(e.limitTxt||'').trim())m.push({sec:7,t:n+'の更新上限の内容'});
   });
   return m;
 }
 function upd(){
+  show('deskBox', gv('f_deskOther')==='代表者と異なる');
   show('rulesPlaceBox', gv('f_rules')==='ある');
   show('rulesNoneBox',  gv('f_rules')==='ない');
   var m=missing();
@@ -487,18 +515,25 @@ var COLS=['送信日時','事業場名称','事業場所在地','代表者職氏
  'パート昇給','パート賞与','パート退職金',
  '氏名','雇入れ日','雇用の形','契約開始日','契約終了日','仕事の内容',
  '勤務パターン名','始業','終業','休憩分','週勤務日数','残業','勤務時間の形',
- '給与の種類','金額','手当'];
+ '給与の種類','金額','手当',
+ '更新上限の有無','更新上限の内容',
+ '相談窓口部署','相談窓口担当者','相談窓口連絡先'];
 function rows(){
   var now=new Date(), ts=now.getFullYear()+'/'+('0'+(now.getMonth()+1)).slice(-2)+'/'+('0'+now.getDate()).slice(-2)
     +' '+('0'+now.getHours()).slice(-2)+':'+('0'+now.getMinutes()).slice(-2);
   var base=[ts,gv('f_compName'),gv('f_compAddr'),gv('f_compRep'),gv('f_compTel'),gv('f_rules'),gv('f_rulesPlace'),
     gv('f_placeScope'),gv('f_jobScope'),val('payCut'),val('payDay'),val('holiday'),gv('f_retire'),gv('f_ins'),
     gv('f_ptRaise'),gv('f_ptBonus'),gv('f_ptSever')];
+  var other=(gv('f_deskOther')==='代表者と異なる');
+  var desk=[other?gv('f_deskDept'):'', other?gv('f_deskName'):'', other?gv('f_deskTel'):''];
   return EMP.map(function(e){
     var p=PAT.filter(function(x){return String(x.id)===String(e.pat)})[0]||{};
     return base.concat([e.name,e.hired,e.kubun,e.term,e.termTo,e.job,
       p.name||'',p.start||'',p.end||'',p.brk||'',p.dpw||'',p.ot||'',p.shift||'',
-      e.wageKind,e.wage,e.allow]);
+      e.wageKind,e.wage,e.allow,
+      (e.kubun==='契約社員・パート（期間の定めあり）')?(e.limitHas||'無'):'',
+      (e.kubun==='契約社員・パート（期間の定めあり）'&&e.limitHas==='有')?(e.limitTxt||''):''
+    ]).concat(desk);
   });
 }
 function tsv(){
