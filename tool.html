@@ -300,9 +300,8 @@ function buildCompany(key,rs,F){
   comp.founder='無'; comp.quitDays='14'; comp.dismissal=DISMISS_DEFAULT;
   comp.siKosei=kosei; comp.siKenpo=kosei; comp.siOther=''; comp.empInsDef=koyo;
   comp.chutaikyo='加入していない'; comp.pension='無';
-  /* 相談窓口は既定では代表者。フォームで「代表者と異なる」を選んだ分だけ差し替える */
-  var dDept=F(r0,'相談窓口部署'), dName=F(r0,'相談窓口担当者'), dTel=F(r0,'相談窓口連絡先');
-  comp.w1dept=dDept||key; comp.w1name=dName||rep; comp.w1tel=dTel||tel;
+  /* 相談窓口の既定は代表者。行ごとに担当者が入っていれば、その人だけ差し替わる */
+  comp.w1dept=key; comp.w1name=rep; comp.w1tel=tel;
   comp.w2same='同じ（同上と記載）';
   comp.artTime=''; comp.artHoliday=''; comp.artVac=''; comp.artWage=''; comp.artRetire='';
   comp.rulesName='';
@@ -355,7 +354,7 @@ function buildCompany(key,rs,F){
       e.renewKind='更新する場合があり得る';
       e.renewCriteria='契約期間満了時の業務量・勤務成績、態度・能力・会社の経営状況・従事している業務の進捗状況';
       var lh=F(r,'更新上限の有無'), lt=F(r,'更新上限の内容');
-      e.limitTxt=(lh==='有')?('有（'+(lt||'通算5年まで')+'）'):'無';
+      e.limitTxt=(lh==='有')?('有（'+(lt||'通算契約期間５年まで')+'）'):'無';
     } else { e.renewKind='';e.renewCriteria='';e.limitTxt=''; }
     e.muki='該当しない';
     e.place1=place1; e.place2=place2;
@@ -371,6 +370,7 @@ function buildCompany(key,rs,F){
     var al=parseAllow(F(r,'手当'));
     e.al1=al[0]; e.al2=al[1]; e.al3=al[2]; e.al4=al[3];
     e.allowRaw=F(r,'手当');
+    e.w1dept=F(r,'相談窓口部署'); e.w1name=F(r,'相談窓口担当者'); e.w1tel=F(r,'相談窓口連絡先');
     e.raise=(ptR==='あり')?'有':'無';
     e.bonus=(ptB==='あり')?'有':'無';
     e.sever=(ptS==='あり')?'有':'無';
@@ -596,12 +596,14 @@ function buildDoc(e){
   if((c.siKenpo||'有')==='有')si.push('健康保険');
   if(c.siOther)si.push(String(c.siOther));
   var w2same = (c.w2same||'').indexOf('同じ')===0;
+  /* 窓口は従業員ごと。空なら会社の既定（代表者） */
+  var w1d=e.w1dept||c.w1dept, w1n=e.w1name||c.w1name, w1t=e.w1tel||c.w1tel;
   var t10 = '<div>・社会保険の加入状況（'+vv(si.join('　')||'無',12)+'）</div>'
     + '<div>・雇用保険の適用（'+opt(e.empIns||'有',['有','無'])+'）</div>'
     + '<div>・中小企業退職金共済制度（'+opt(c.chutaikyo||'加入していない',['加入している','加入していない'])+'）（※中小企業の場合）</div>'
     + '<div>・企業年金制度（'+vv(c.pension||'無',10)+'）</div>'
     + '<div class="ind">・次の窓口に対して通常の労働者との間の待遇の相違（内容・理由）等について説明を求めることができる。</div>'
-    + '<div class="sub">部署名 '+vv(c.w1dept,7)+'　担当者職氏名 '+vv(c.w1name,8)+'　（連絡先 '+vv(c.w1tel,9)+'）</div>'
+    + '<div class="sub">部署名 '+vv(w1d,7)+'　担当者職氏名 '+vv(w1n,8)+'　（連絡先 '+vv(w1t,9)+'）</div>'
     + '<div>・雇用管理の改善等に関する事項に係る相談窓口</div>'
     + '<div class="sub">'+(w2same
         ? '同上'
