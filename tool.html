@@ -321,31 +321,35 @@ function buildCompany(key,rs,F){
   var job2=/限る/.test(jobScope)?'変更なし（上記の業務に限る）':'会社の定める業務全般';
   var ptR=F(r0,'パート昇給'), ptB=F(r0,'パート賞与'), ptS=F(r0,'パート退職金');
 
-  /* 勤務パターン */
-  var pats={};
+  /* 「通常の労働者」の週所定。事業者が「正社員」と答えた行から取る。
+     正社員が1人も貼られていないときは比べる相手がいないので、法定の週４０時間を代わりに使う。
+     以前は「貼られた中でいちばん長い勤務」を基準にしていたため、パートが1人だけのとき
+     その人自身が基準になり、必ず「正社員・一般様式」になっていた（パート・有期雇用労働法２条１項） */
+  var fullWeek=0, hasFull=false;
   rs.forEach(function(r){
-    var pn=F(r,'勤務パターン名')||'勤務パターン';
-    if(pats[pn])return;
-    pats[pn]={name:pn,start:F(r,'始業'),end:F(r,'終業'),brk:F(r,'休憩分'),
-      dpw:F(r,'週勤務日数')||'5',otYes:F(r,'残業')||'有',
-      varType:(F(r,'勤務時間の形').indexOf('シフト')>=0)?'1か月単位の変形労働時間制':'なし（通常の勤務）'};
+    if(!/^正社員/.test(F(r,'雇用の形')))return;
+    var h=dayHours(F(r,'始業'),F(r,'終業'),F(r,'休憩分')),d=+(F(r,'週勤務日数')||'5')||0;
+    if(h===null||!d)return;
+    hasFull=true; if(h*d>fullWeek)fullWeek=h*d;
   });
-  /* 「通常の労働者」＝この事業場でいちばん週所定が長い勤務。それより短い人が短時間労働者
-     （パートタイム・有期雇用労働法2条1項）。フルタイムの有期契約は短時間労働者ではない */
-  var fullWeek=0;
-  Object.keys(pats).forEach(function(k2){
-    var p=pats[k2],h=dayHours(p.start,p.end,p.brk),d=+p.dpw||0;
-    if(h!==null&&d&&h*d>fullWeek)fullWeek=h*d;
-  });
+  if(!hasFull)fullWeek=40;
 
   return rs.map(function(r){
-    var pn=F(r,'勤務パターン名')||'勤務パターン';
-    var p=pats[pn];
+    /* 勤務条件は行ごとに持っているので、その行からそのまま読む */
+    var p={name:F(r,'勤務パターン名')||'勤務パターン',
+      start:F(r,'始業'), end:F(r,'終業'), brk:F(r,'休憩分'),
+      dpw:F(r,'週勤務日数')||'5', otYes:F(r,'残業')||'有',
+      varType:(F(r,'勤務時間の形').indexOf('シフト')>=0)?'1か月単位の変形労働時間制':'なし（通常の勤務）'};
     var dayH=dayHours(p.start,p.end,p.brk), dpw=+p.dpw||0;
     var weekH=(dayH!==null&&dpw)?dayH*dpw:null;
     var kubun=F(r,'雇用の形');
     var yuki=/期間の定めあり/.test(kubun);
-    var isShort=(weekH!==null&&fullWeek>0&&weekH<fullWeek);
+    /* 事業者の回答を優先する。「パート・アルバイト」と答えていれば短時間労働者、
+       「正社員」と答えていれば通常の労働者。「契約社員・パート」はどちらとも言えないので、
+       通常の労働者との週所定の比較で決める */
+    var saysPart=/^パート・アルバイト/.test(kubun);
+    var saysFull=/^正社員/.test(kubun);
+    var isShort=saysPart||(!saysFull&&weekH!==null&&fullWeek>0&&weekH<fullWeek);
     var a=alvDays(dpw,weekH);
     var wkRaw=F(r,'給与の種類');
     var wk=(wkRaw==='時給')?'時間給':(wkRaw||'月給');
@@ -354,7 +358,7 @@ function buildCompany(key,rs,F){
     e.name=F(r,'氏名');
     e.issue=today();
     e.hired=toIso(F(r,'雇入れ日'));
-    e.kubun=yuki?'契約社員（有期）':(isShort?'パート・アルバイト':'正社員');
+    e.kubun=yuki?'契約社員（有期）':(saysPart?'パート・アルバイト':'正社員');
     e.form=isShort?'短時間労働者用（常用、有期雇用型）':'一般労働者用（常用、有期雇用型）';
     e.termHas=yuki?'期間の定めあり':'期間の定めなし';
     e.termFrom=toIso(F(r,'契約開始日')); e.termTo=toIso(F(r,'契約終了日'));
@@ -397,15 +401,19 @@ function warnOf(c,e,dayH,weekH){
   if(dayH===null)w.push('始業・終業から勤務時間を計算できません');
   if(dayH!==null&&dayH>8&&!flex)w.push('1日の所定労働時間が'+fmtH(dayH)+'（8時間超・労基法32条）');
   if(weekH!==null&&weekH>40&&!flex)w.push('週の所定労働時間が'+fmtH(weekH)+'（40時間超・労基法32条）');
-  var b=+e.brk||0, work=(dayH!==null)?dayH+b/60:null;
-  if(work!==null){
-    if(work>8&&b<60)w.push('休憩'+b+'分（8時間超は60分以上・労基法34条）');
-    else if(work>6&&b<45)w.push('休憩'+b+'分（6時間超は45分以上・労基法34条）');
+  /* 労基法34条は「労働時間」が基準。拘束時間（労働時間＋休憩）で見ると、
+     例えば実働6時間乡休憩30分（休憩義務なし）でも警告が出てしまっていた */
+  var b=+e.brk||0;
+  if(dayH!==null){
+    if(dayH>8&&b<60)w.push('休憩'+b+'分（8時間超は60分以上・労基法34条）');
+    else if(dayH>6&&b<45)w.push('休憩'+b+'分（6時間超は45分以上・労基法34条）');
   }
   if(e.termHas==='期間の定めあり'&&(!e.termFrom||!e.termTo))w.push('有期契約ですが契約期間が空です');
   if(!c.payCut||!c.payDay)w.push('賃金の締切日または支払日が空です');
   if(!c.compRep)w.push('代表者職氏名が空です');
   if(!c.w1tel)w.push('電話番号が空です（相談窓口の連絡先に使います）');
+  if(e.empIns==='無'&&c.empInsDef==='有')
+    w.push('雇用保険を「無」で出力します（週所定'+fmtH(weekH)+'で、20時間未満のため）');
   return w;
 }
 
