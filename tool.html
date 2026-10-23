@@ -124,8 +124,16 @@
   <h2><span class="n">3</span>通知書を出す</h2>
   <div class="btns">
     <button class="btn" onclick="printSel()">チェックした人の通知書を印刷（PDF保存）</button>
+    <button class="btn g" onclick="wordSel()">チェックした人の通知書をWordで保存</button>
     <button class="btn out sm" onclick="selAll(true)">全選択</button>
     <button class="btn out sm" onclick="selAll(false)">全解除</button>
+  </div>
+  <div class="note">
+    <b>PDFとWordの使い分け</b><br>
+    そのまま交付するなら<b>PDF</b>。交付前に文言を足す・直すなら<b>Word</b>。<br>
+    Wordは「.doc」で保存されます。開いたあと [名前を付けて保存] から .docx にしてください。<br>
+    開くときに<b>「保護ビュー」</b>の帯が出たら「編集を有効にする」を押してください（ダウンロードしたファイルに出るWordの標準の振る舞いです）。<br>
+    <b>どちらも下書きです。</b>内容の最終確認と従業員への交付は事業者さまご自身でお願いします。
   </div>
   <div class="note">
     <b>印刷ダイアログでの設定</b><br>
@@ -431,7 +439,7 @@ function draw(notFound){
       +'<td>'+esc(e.wageKind)+' '+comma(e.wageAmt)+'円'+(e.allowRaw?'<div class="hint">'+esc(e.allowRaw)+'</div>':'')+'</td>'
       +'<td class="c">'+esc(e.alv)+'日</td>'
       +'<td>'+(x.warn.length?'<div class="w">・'+x.warn.map(esc).join('<br>・')+'</div>':'<span style="color:#1a5e3c">—</span>')+'</td>'
-      +'<td class="c"><button class="btn out sm" onclick="printOne('+i+')">通知書</button></td>'
+      +'<td class="c"><button class="btn out sm" onclick="printOne('+i+')">通知書</button> '+'<button class="btn out sm" onclick="wordOne('+i+')">Word</button></td>'
       +'</tr>';
   });
   h+='</table>';
@@ -470,6 +478,101 @@ function printSel(){
   var n=document.querySelectorAll('.sel'),l=[];
   for(var i=0;i<n.length;i++) if(n[i].checked) l.push(ROWS[+n[i].getAttribute('data-i')]);
   printRows(l);
+}
+
+/* ===== Wordで保存 =====
+   画面の通知書はブラウザ向けのCSSで組んである。Wordのレンダラは
+   ::before・flex・inline-blockをほぼ解釈しないので、そのまま渡すと
+   選択肢の○が消え、宛先が縦に崩れ、記入欄の下線が出ない。
+   ここで「同じ内容のまま、Wordが読める書き方」に置き換える */
+
+/* Word用に A4 と余白を指定する。mso の section 定義でないと効かない */
+var WORD_CSS = ''
+ + '@page WordSection1{size:21.0cm 29.7cm;margin:0.9cm 1.0cm;mso-page-orientation:portrait}'
+ + 'div.WordSection1{page:WordSection1}'
+ + 'body{font-family:"Yu Mincho","MS Mincho",serif;font-size:8.8pt;line-height:1.45;color:#000}'
+ + '.lcdoc{font-family:"Yu Mincho","MS Mincho",serif;font-size:8.8pt;line-height:1.45;color:#000}'
+ + '.lcdoc div{margin:0}'
+ + '.dkind{font-size:8pt}'
+ + '.ddate{text-align:right;font-size:9pt;margin:1mm 0}'
+ + '.dtitle{text-align:center;font-family:"Yu Gothic","MS Gothic",sans-serif;font-size:14pt;'
+ +   'font-weight:700;letter-spacing:.4em;margin:2mm 0}'
+ + 'table.dheadt{width:100%;border-collapse:collapse;margin:0 0 2.5mm}'
+ + 'table.dheadt td{border:none;padding:0;vertical-align:bottom}'
+ + 'table.dheadt td.to{font-size:11pt;border-bottom:.6pt solid #000;width:45%}'
+ + 'table.dheadt td.fr{font-size:8.8pt;line-height:1.75;text-align:left}'
+ + 'table.doc{width:100%;border-collapse:collapse}'
+ + 'table.doc td,table.doc th{border:.6pt solid #000;padding:1.5mm 2mm;vertical-align:top;'
+ +   'font-weight:400;text-align:left;font-size:8.8pt}'
+ + 'table.doc th{width:25mm;font-family:"Yu Gothic","MS Gothic",sans-serif;font-size:8.2pt;text-align:center}'
+ + '.v{text-decoration:underline}'
+ + '.blank{text-decoration:underline;color:#000}'
+ + '.sel{font-weight:700}'
+ + 's{color:#8a8a8a}'
+ + '.sub{margin-left:1.2em}'
+ + '.ind{margin-left:1.4em;text-indent:-1.4em}'
+ + '.nw{white-space:nowrap}'
+ + '.tail{font-size:7.8pt;margin-top:2.5mm;line-height:1.65}'
+ + '.cont{text-align:right;font-size:8pt;margin:1mm 0}'
+ + '.pbreak{page-break-before:always}';
+
+/* 画面用のHTMLを、Wordが読める書き方に置き換える */
+function toWordHtml(h){
+  var w = h;
+
+  /* 1. 選択された選択肢の○。CSSの ::before はWordに無いので文字にする */
+  w = w.replace(/<span class="sel">/g, '<span class="sel">○');
+
+  /* 2. 宛先と事業者名は flex で左右に置いている。Wordでは表にする */
+  w = w.replace(/<div class="dhead"><div class="to">([\s\S]*?)<\/div><div class="fr">([\s\S]*?)<\/div><\/div>/g,
+    function(_, to, fr){
+      return '<table class="dheadt"><tr><td class="to">' + to + '</td>'
+           + '<td class="fr">' + fr.replace(/\n/g, '<br>') + '</td></tr></table>';
+    });
+
+  /* 3. 空欄は inline-block の幅で出している。Wordでは全角スペースの下線にする */
+  w = w.replace(/<span class="blank" style="min-width:(\d+)em">&nbsp;<\/span>/g,
+    function(_, n){
+      var k = Math.max(3, Math.min(30, parseInt(n, 10) || 6)), s = '';
+      while (s.length < k) s += '　';
+      return '<span class="blank">' + s + '</span>';
+    });
+
+  /* 4. 改ページ。.lcdoc 1枚＝1ページなので、2枚目以降の前で改ページする */
+  w = w.replace(/<div class="lcdoc pb">/g, '<div class="lcdoc pbreak">');
+  w = w.replace(/<\/div><div class="lcdoc">/g, '</div><div class="lcdoc pbreak">');
+
+  /* 5. 表にクラスを付ける（Word用CSSの当て先） */
+  w = w.replace(/<table>/g, '<table class="doc">');
+
+  return w;
+}
+
+function wordRows(list){
+  if(!list.length){alert('Wordで保存する人が選ばれていません。');return}
+  var body = list.map(function(x){ S.comp=x.comp; return buildDoc(x.emp) }).join('');
+  var html = '<html xmlns:o="urn:schemas-microsoft-com:office:office" '
+    + 'xmlns:w="urn:schemas-microsoft-com:office:word" xmlns="http://www.w3.org/TR/REC-html40">'
+    + '<head><meta charset="utf-8">'
+    + '<title>' + esc(pdfName(list)) + '</title>'
+    + '<!--[if gte mso 9]><xml><w:WordDocument><w:View>Print</w:View>'
+    + '<w:Zoom>100</w:Zoom><w:DoNotOptimizeForBrowser/></w:WordDocument></xml><![endif]-->'
+    + '<style>' + WORD_CSS + '</style></head>'
+    + '<body><div class="WordSection1">' + toWordHtml(body) + '</div></body></html>';
+
+  /* BOMを付けないとWordがShift_JISとみなして文字化けする */
+  var blob = new Blob(['﻿' + html], {type:'application/msword'});
+  var a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = pdfName(list) + '.doc';
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  setTimeout(function(){ URL.revokeObjectURL(a.href) }, 10000);
+}
+function wordOne(i){wordRows([ROWS[i]])}
+function wordSel(){
+  var n=document.querySelectorAll('.sel'),l=[];
+  for(var i=0;i<n.length;i++) if(n[i].checked) l.push(ROWS[+n[i].getAttribute('data-i')]);
+  wordRows(l);
 }
 
 /* ========== 通知書の組み立て ========== */
